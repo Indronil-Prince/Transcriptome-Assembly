@@ -1,0 +1,636 @@
+---
+title: "CS509 - Project 1"
+format: html
+editor: visual
+---
+
+# Fruit Fly Genome and Differential Expression in Reproductive Tissues
+
+#### Indronil Bhattacharjee (IB) and Erica Flores (EF)
+
+## Abstract
+
+Scientific research continues to trend toward experimentation that produces high-throughput data, necessitating a partnership between research and computer programming, particularly in the field of molecular biology. RNA sequencing is a common technique in molecular studies, providing total transcript expression data from biological samples. Using a statistical analysis program/language such as R, large data frames containing millions of reads can be interpreted to understand differential gene expression between multiple samples. In this study, we utilize several public databases and free software to download and interpret gene expression in the ovaries and testis of the fruit fly. We found that the overall alignment rates of the paired-end reads to the genome were between 88-91% and reads that matched exactly one time comprised 52-55% of the paired matches. Top hits genes and transcripts were typically associated with transcription or related to sexual reproduction, while lowest hits revealed non-coding RNAs or their biological function was unknown. The ability to compare entire transcriptomes between biological samples is incredibly useful, allowing for faster data analysis and subsequently more information in order to target specific genes for further studies.
+
+## Introduction
+
+Bioinformatics is a growing interdisciplinary field, which lies at the intersection of biology and computational analysis. With the modern advancements in molecular biology, it is now more feasible for researchers to conduct experiments that generate high-throughput data sets, resulting in a need for both an understanding of computer programming and an understanding of the biological processes involved.
+
+RNA sequencing is an example of such an experiment, generating thousands or millions of sequence reads that need to be interpreted in a biological context. By mapping these reads to an annotated genome and generating read counts, we can calculate the difference in gene expression between different biological samples. For example, you could determine how the expression profile of tumor cells changes in response to a cancer drug or compare the expression of specific genes in different tissues or compare different time points during embryonic development.
+
+For this study, we are particularly interested in the differential gene counts and transcripts in the reproductive tissues (ovary and testis) of the fruit fly. The fruit fly, *drosophila melanogaster*, has played a critical role in the advancement of our understanding of genetics, neuroscience, and disease (1). The extensive use of this model has resulted in an abundance of molecular data available in scientific databases, including a well-annotated genome. We are particularly interested in the top genes and transcripts that have the highest and lowest fold change between the two tissues.
+
+## Results
+
+#### **1. Transcriptome Assembly**
+
+For each reproductive tissue (ovary and testis), two replicates of paired-end reads were individually aligned to the genome using the FR and RF parameters for strand specificity, resulting in 8 outputs. As expected, the overall alignment rate varied between the replicates. When we compare the alignment for individual replicates using either setting (FR or RF) for strand specificity, the outputs are identical.
+
+For the testis samples, the overall alignment rate was 88.08% for replicate 1 and 90.29% for replicate 2 (Fig 1-2). In the ovary samples, the overall alignment rate was 90.01% in replicate 1 and 91.03% in replicate 2 (Fig 3-4). We found that the overall alignment rates of the paired-end reads to the genome were between 88-91% and reads that matched exactly one time comprised 52-55% of the paired matches.
+
+**Figures 1-4: HISAT2 alignment outputs - Testis 1, Testis 2, Ovary 1, Ovary 2**
+
+![HISAT2 - Testis 1](hisat-output/testis1.png)
+
+![HISAT2 - Testis 1](hisat-output/testis2.png)
+
+![HISAT2 - Ovary 1](hisat-output/ovary1.png)
+
+![HISAT2 - Ovary 2](hisat-output/ovary2.png)
+
+#### **2. Transcriptome Quantification**
+
+The output of Stringtie is a GTF of all the aligned reads for each sample of genes and transcripts, which includes abundance data, FPKM and TPM, as well. These files will be included with the submission but, for the purpose of the report, we show the first few rows of each sample for genes and transcripts.
+
+```{r}
+# Load necessary libraries
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+
+# Load the transcript abundance data for both ovary and testis replicates
+ovary_replicate1_transcript <- read.table("transcript_abundance_ovary_replicate1.tab", header = TRUE, sep = "\t")
+ovary_replicate2_transcript <- read.table("transcript_abundance_ovary_replicate2.tab", header = TRUE, sep = "\t")
+testis_replicate1_transcript <- read.table("transcript_abundance_testis_replicate1.tab", header = TRUE, sep = "\t")
+testis_replicate2_transcript <- read.table("transcript_abundance_testis_replicate1.tab", header = TRUE, sep = "\t")
+
+# Load the gene abundance data for both ovary and testis replicates
+ovary_replicate1_gene <- read.table("gene_abundance_ovary_replicate1.tab", header = TRUE, sep = "\t")
+ovary_replicate2_gene <- read.table("gene_abundance_ovary_replicate2.tab", header = TRUE, sep = "\t")
+testis_replicate1_gene <- read.table("gene_abundance_testis_replicate1.tab", header = TRUE, sep = "\t")
+testis_replicate2_gene <- read.table("gene_abundance_testis_replicate2.tab", header = TRUE, sep = "\t")
+
+
+#print rows to report gene abundance 
+
+head(ovary_replicate1_gene)
+head(ovary_replicate2_gene)
+head(testis_replicate1_gene)
+head(testis_replicate2_gene)
+
+#print rows o report transcript abundance
+
+head(ovary_replicate1_transcript)
+head(ovary_replicate2_transcript)
+head(testis_replicate1_transcript)
+head(testis_replicate2_transcript)
+
+
+
+
+
+
+```
+
+#### **3. Genes and Transcripts of High Fold-Change**
+
+Replicate data was merged, in order to create a single file for each tissue and the log fold change for each gene or transcript was calculated. This data is visualized as heatmaps for the top genes or transcripts with the highest and lowest fold changes between the tissues. Abundance metrics include TPM and FPKM, and coverage was included as well.
+
+```{r}
+
+testis_merged_gene <- bind_rows(testis_replicate1_gene, testis_replicate2_gene)
+ovary_merged_gene <- bind_rows(ovary_replicate1_gene, ovary_replicate2_gene)
+
+# Calculate the average gene abundance for ovary and testis
+avg_abundance_ovary <- rowMeans(ovary_merged_gene[, 7:9])
+avg_abundance_testis <- rowMeans(testis_merged_gene[, 7:9])
+
+# Calculate the log fold change (r_g)
+log_fold_change_gene <- log2((1 + avg_abundance_ovary) / (1 + avg_abundance_testis))
+
+
+testis_merged_transcript <- bind_rows(testis_replicate1_transcript, testis_replicate2_transcript)
+ovary_merged_transcript <- bind_rows(ovary_replicate1_transcript, ovary_replicate2_transcript)
+
+# Calculate the average transcript abundance for ovary and testis
+avg_abundance_ovary <- rowMeans(ovary_merged_transcript[, 7:9])
+avg_abundance_testis <- rowMeans(testis_merged_transcript[, 7:9])
+
+# Calculate the log fold change (r_g)
+log_fold_change_transcript <- log2((1 + avg_abundance_ovary) / (1 + avg_abundance_testis))
+```
+
+**Genes - Testis Highest and Lowest Fold Change**
+
+```{r}
+# Add the log fold change values to the data
+testis_merged_gene$log_fold_change_gene <- log_fold_change_gene
+
+#HIGHEST
+# Find the top genes with the greatest and lowest log fold change values
+top_genes_greatest <- testis_merged_gene %>% arrange(desc(log_fold_change_gene)) %>% head(5)
+
+
+# Visualize the expression of top genes using a boxplot
+# Assuming the columns "Coverage" to "TPM" represent expression values
+top_genes_names_greatest <- c(top_genes_greatest$Gene.ID)
+top_testis_genes_highest <- top_genes_names_greatest
+
+# Filter data for topgenes
+testis_merged_gene_filtered <- testis_merged_gene %>%
+  filter(Gene.ID %in% top_genes_names_greatest)
+
+# Pivot the data for heatmap visualization
+heatmap_data <- testis_merged_gene_filtered %>%
+  select(Gene.ID, Coverage:TPM) %>%
+  pivot_longer(cols = -Gene.ID, names_to = "Expression", values_to = "Value")
+
+# Create a heatmap
+options(repr.plot.width = 6, repr.plot.height = 4) 
+ggplot(heatmap_data, aes(x = Gene.ID, y = Expression, fill = Value)) +
+  geom_tile() +
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  labs(title = "Heatmap of Expression for Top Testis Genes (Lowest Log Fold Change)",
+       x = "Gene",
+       y = "Expression Type") +
+  theme(axis.text.x = element_text(size = 12, angle = 45, hjust = 1),
+        axis.text.y = element_text(size = 12),plot.title = element_text(hjust = 0.5))
+
+
+#LOWEST
+top_genes_lowest <- testis_merged_gene %>% arrange(log_fold_change_gene) %>% head(5)
+top_genes_names_lowest <- c(top_genes_lowest$Gene.ID)
+top_testis_genes_lowest <- top_genes_names_lowest
+
+# Filter data for top genes
+testis_merged_gene_filtered <- testis_merged_gene %>%
+  filter(Gene.ID %in% top_genes_names_lowest)
+
+# Pivot the data for heatmap visualization
+heatmap_data <- testis_merged_gene_filtered %>%
+  select(Gene.ID, Coverage:TPM) %>%
+  pivot_longer(cols = -Gene.ID, names_to = "Expression", values_to = "Value")
+
+# Create a heatmap
+options(repr.plot.width = 10, repr.plot.height = 8) 
+ggplot(heatmap_data, aes(x = Gene.ID, y = Expression, fill = Value)) +
+  geom_tile() +
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  labs(title = "Heatmap of Expression for Top Testis Genes (Highest Log Fold Change)",
+       x = "Gene",
+       y = "Expression Type") +
+  theme(axis.text.x = element_text(size = 12, angle = 45, hjust = 1),
+        axis.text.y = element_text(size = 12),plot.title = element_text(hjust = 0.5))
+```
+
+**Genes - Ovary Highest and Lowest Fold Change**
+
+```{r}
+# Add the log fold change values to the data
+ovary_merged_gene$log_fold_change_gene <- log_fold_change_gene
+
+#HIGHEST
+# Find the top genes with the greatest and lowest log fold change values
+top_genes_greatest <- ovary_merged_gene %>% arrange(desc(log_fold_change_gene)) %>% head(5)
+
+
+# Visualize the expression of top genes using a boxplot
+# Assuming the columns "Coverage" to "TPM" represent expression values
+top_genes_names_greatest <- c(top_genes_greatest$Gene.ID)
+top_ovary_genes_highest <- top_genes_names_greatest
+
+# Filter data for top genes
+ovary_merged_gene_filtered <- ovary_merged_gene %>%
+  filter(Gene.ID %in% top_genes_names_greatest)
+
+# Pivot the data for heatmap visualization
+heatmap_data <- ovary_merged_gene_filtered %>%
+  select(Gene.ID, Coverage:TPM) %>%
+  pivot_longer(cols = -Gene.ID, names_to = "Expression", values_to = "Value")
+
+# Create a heatmap
+options(repr.plot.width = 10, repr.plot.height = 8) 
+ggplot(heatmap_data, aes(x = Gene.ID, y = Expression, fill = Value)) +
+  geom_tile() +
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  labs(title = "Heatmap of Expression for Top Ovary Genes (Highest Log Fold Change)",
+       x = "Gene",
+       y = "Expression Type") +
+  theme(axis.text.x = element_text(size = 12, angle = 45, hjust = 1),
+        axis.text.y = element_text(size = 12),plot.title = element_text(hjust = 0.5))
+
+
+#LOWESTgene
+top_genes_lowest <- ovary_merged_gene %>% arrange(log_fold_change_gene) %>% head(5)
+top_genes_names_lowest <- c(top_genes_lowest$Gene.ID)
+top_ovary_genes_lowest <- top_genes_names_lowest
+
+# Filter data for top genes
+ovary_merged_gene_filtered <- ovary_merged_gene %>%
+  filter(Gene.ID %in% top_genes_names_lowest)
+
+# Pivot the data for heatmap visualization
+heatmap_data <- ovary_merged_gene_filtered %>%
+  select(Gene.ID, Coverage:TPM) %>%
+  pivot_longer(cols = -Gene.ID, names_to = "Expression", values_to = "Value")
+
+# Create a heatmap
+options(repr.plot.width = 10, repr.plot.height = 8) 
+ggplot(heatmap_data, aes(x = Gene.ID, y = Expression, fill = Value)) +
+  geom_tile() +
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  labs(title = "Heatmap of Expression for Top Ovary Genes (Lowest Log Fold Change)",
+       x = "Gene",
+       y = "Expression Type") +
+  theme(axis.text.x = element_text(size = 12, angle = 45, hjust = 1),
+        axis.text.y = element_text(size = 12),plot.title = element_text(hjust = 0.5))
+```
+
+**Transcripts - Testis Highest and Lowest Fold Change**
+
+```{r}
+# Add the log fold change values to the data
+testis_merged_transcript$log_fold_change_transcript <- log_fold_change_transcript
+
+#HIGHEST
+# Find the top transcripts with the greatest and lowest log fold change values
+top_transcripts_greatest <- testis_merged_transcript %>% arrange(desc(log_fold_change_transcript)) %>% head(5)
+
+
+# Visualize the expression of top transcripts using a boxplot
+# Assuming the columns "Coverage" to "TPM" represent expression values
+top_transcripts_names_greatest <- c(top_transcripts_greatest$Transcript.ID)
+top_testis_transcripts_highest <- top_transcripts_names_greatest
+
+# Filter data for top transcripts
+testis_merged_transcript_filtered <- testis_merged_transcript %>%
+  filter(Transcript.ID %in% top_transcripts_names_greatest)
+
+# Pivot the data for heatmap visualization
+heatmap_data <- testis_merged_transcript_filtered %>%
+  select(Transcript.ID, Coverage:TPM) %>%
+  pivot_longer(cols = -Transcript.ID, names_to = "Expression", values_to = "Value")
+
+# Create a heatmap
+options(repr.plot.width = 10, repr.plot.height = 8) 
+ggplot(heatmap_data, aes(x = Transcript.ID, y = Expression, fill = Value)) +
+  geom_tile() +
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  labs(title = "Heatmap of Expression for Top Testis Transcripts (Lowest Log Fold Change)",
+       x = "Transcript",
+       y = "Expression Type") +
+  theme(axis.text.x = element_text(size = 12, angle = 45, hjust = 1),
+        axis.text.y = element_text(size = 12),plot.title = element_text(hjust = 0.5))
+
+
+#LOWEST
+top_transcripts_lowest <- testis_merged_transcript %>% arrange(log_fold_change_transcript) %>% head(5)
+top_transcripts_names_lowest <- c(top_transcripts_lowest$Transcript.ID)
+top_testis_transcripts_lowest <- top_transcripts_names_lowest
+
+# Filter data for top transcripts
+testis_merged_transcript_filtered <- testis_merged_transcript %>%
+  filter(Transcript.ID %in% top_transcripts_names_lowest)
+
+# Pivot the data for heatmap visualization
+heatmap_data <- testis_merged_transcript_filtered %>%
+  select(Transcript.ID, Coverage:TPM) %>%
+  pivot_longer(cols = -Transcript.ID, names_to = "Expression", values_to = "Value")
+
+# Create a heatmap
+options(repr.plot.width = 10, repr.plot.height = 8) 
+ggplot(heatmap_data, aes(x = Transcript.ID, y = Expression, fill = Value)) +
+  geom_tile() +
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  labs(title = "Heatmap of Expression for Top Testis Transcripts (Highest Log Fold Change)",
+       x = "Transcript",
+       y = "Expression Type") +
+  theme(axis.text.x = element_text(size = 12, angle = 45, hjust = 1),
+        axis.text.y = element_text(size = 12),plot.title = element_text(hjust = 0.5))
+```
+
+**Transcripts - Ovary Highest and Lowest Fold Change**
+
+```{r}
+# Add the log fold change values to the data
+ovary_merged_transcript$log_fold_change_transcript <- log_fold_change_transcript
+
+#HIGHEST
+# Find the top transcripts with the greatest and lowest log fold change values
+top_transcripts_greatest <- ovary_merged_transcript %>% arrange(desc(log_fold_change_transcript)) %>% head(5)
+
+
+# Visualize the expression of top transcripts using a boxplot
+# Assuming the columns "Coverage" to "TPM" represent expression values
+top_transcripts_names_greatest <- c(top_transcripts_greatest$Transcript.ID)
+top_ovary_transcripts_highest <- top_transcripts_names_greatest
+
+# Filter data for top transcripts
+ovary_merged_transcript_filtered <- ovary_merged_transcript %>%
+  filter(Transcript.ID %in% top_transcripts_names_greatest)
+
+# Pivot the data for heatmap visualization
+heatmap_data <- ovary_merged_transcript_filtered %>%
+  select(Transcript.ID, Coverage:TPM) %>%
+  pivot_longer(cols = -Transcript.ID, names_to = "Expression", values_to = "Value")
+
+# Create a heatmap
+options(repr.plot.width = 10, repr.plot.height = 8) 
+ggplot(heatmap_data, aes(x = Transcript.ID, y = Expression, fill = Value)) +
+  geom_tile() +
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  labs(title = "Heatmap of Expression for Top Ovary Transcripts (Highest Log Fold Change)",
+       x = "Transcript",
+       y = "Expression Type") +
+  theme(axis.text.x = element_text(size = 16, angle = 45, hjust = 1),
+        axis.text.y = element_text(size = 16),plot.title = element_text(hjust = 0.5))
+
+
+#LOWEST
+top_transcripts_lowest <- ovary_merged_transcript %>% arrange(log_fold_change_transcript) %>% head(5)
+top_transcripts_names_lowest <- c(top_transcripts_lowest$Transcript.ID)
+top_ovary_transcripts_lowest <- top_transcripts_names_lowest
+
+# Filter data for top transcripts
+ovary_merged_transcript_filtered <- ovary_merged_transcript %>%
+  filter(Transcript.ID %in% top_transcripts_names_lowest)
+
+# Pivot the data for heatmap visualization
+heatmap_data <- ovary_merged_transcript_filtered %>%
+  select(Transcript.ID, Coverage:TPM) %>%
+  pivot_longer(cols = -Transcript.ID, names_to = "Expression", values_to = "Value")
+
+# Create a heatmap
+options(repr.plot.width = 10, repr.plot.height = 8) 
+ggplot(heatmap_data, aes(x = Transcript.ID, y = Expression, fill = Value)) +
+  geom_tile() +
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  labs(title = "Heatmap of Expression for Top Ovary Transcripts (Lowest Log Fold Change)",
+       x = "Transcript",
+       y = "Expression Type") +
+  theme(axis.text.x = element_text(size = 16, angle = 45, hjust = 1),
+        axis.text.y = element_text(size = 16),plot.title = element_text(hjust = 0.5))
+```
+
+**Summary Table for Gene/Transcript Functions of Top Hits**
+
+![Ovary Genes](Top%20Hits%20Function%20Tables/Ovary_gene_table.png){width="541"}
+
+![Testis Genes](Top Hits Function Tables/testis_gene_table.png){width="543"}
+
+![Ovary Transcripts](Top%20Hits%20Function%20Tables/ovary_transcript_table.png){width="542"}
+
+![Testis Transcripts](Top Hits Function Tables/testis_transcript_table.png){width="545"}
+
+**Top Transcripts located within genomic region of top genes**
+
+```{r}
+cat("Top Testis Genes and Transcripts with lowest Log Fold Change\n")
+cat("============================================================\n")
+
+filtered_gene_data <- testis_merged_gene %>%
+  filter(Gene.ID %in% top_testis_genes_lowest)
+
+# Extract the start and end positions for the selected genes
+gene_ids <- unique(filtered_gene_data$Gene.ID)
+gene_start_positions <- unique(filtered_gene_data$Start)
+gene_end_positions <- unique(filtered_gene_data$End)
+
+
+filtered_transcript_data <- testis_merged_transcript %>%
+  filter(Transcript.ID %in% top_testis_transcripts_lowest)
+
+# Extract the start and end positions for the selected transcripts
+transcript_ids <- unique(filtered_transcript_data$Transcript.ID)
+transcripts_start_positions <- unique(filtered_transcript_data$Start)
+transcripts_end_positions <- unique(filtered_transcript_data$End)
+
+for (x in 1:length(transcripts_start_positions)) {
+    for (y in 1:length(gene_start_positions)) {
+      if(gene_end_positions[y] >= transcripts_end_positions[x] & gene_start_positions[y] <= transcripts_start_positions[x])
+      {
+          cat("Transcript", transcript_ids[x], " is in genomic region of ", gene_ids[y], "gene\n")
+      }
+  }
+}
+```
+
+```{r}
+cat("Top Ovary Genes and Transcripts with highest Log Fold Change\n")
+cat("============================================================\n")
+filtered_gene_data <- ovary_merged_gene %>%
+  filter(Gene.ID %in% top_ovary_genes_highest)
+
+# Extract the start and end positions for the selected genes
+gene_ids <- unique(filtered_gene_data$Gene.ID)
+gene_start_positions <- unique(filtered_gene_data$Start)
+gene_end_positions <- unique(filtered_gene_data$End)
+
+
+filtered_transcript_data <- ovary_merged_transcript %>%
+  filter(Transcript.ID %in% top_ovary_transcripts_highest)
+
+# Extract the start and end positions for the selected transcripts
+transcript_ids <- unique(filtered_transcript_data$Transcript.ID)
+transcripts_start_positions <- unique(filtered_transcript_data$Start)
+transcripts_end_positions <- unique(filtered_transcript_data$End)
+
+for (x in 1:length(transcripts_start_positions)) {
+    for (y in 1:length(gene_start_positions)) {
+      if(gene_end_positions[y] >= transcripts_end_positions[x] & gene_start_positions[y] <= transcripts_start_positions[x])
+      {
+          cat("Transcript", transcript_ids[x], " is in genomic region of ", gene_ids[y], "gene\n")
+      }
+  }
+}
+```
+
+## Data Source
+
+#### Genome sequence and annotation files were acquired from FlyBase.
+
+Genome Sequence File - FlyBase (FB2023_04)
+
+<http://ftp.flybase.net/releases/FB2023_04/dmel_r6.53/fasta/dmel-all-chromosome-r6.53.fasta.gz>
+
+Genome Annotation File - FlyBase
+
+<http://ftp.flybase.net/releases/FB2023_04/dmel_r6.53/gtf/dmel-all-r6.53.gtf.gz>
+
+#### RNA-seq for Fly Testis and Ovary were acquired from the Encode Project.
+
+RNAseq - Testis - Encode Project
+
+<https://www.encodeproject.org/experiments/ENCSR254JFC/>
+
+RNAseq - Ovary - Encode Project
+
+<https://www.encodeproject.org/experiments/ENCSR272DXE/>
+
+## Methods
+
+#### Software
+
+R Studio - R version 4.2.2 (2022-10-31 urct)
+
+Jupyter Notebook
+
+HISAT2 - HISAT2 2.2.1
+
+Bowtie2-2.5.1
+
+#### Transcriptome Assembly
+
+Two replicates of ovary sequence reads and two replicates of testis sequence reads were individually aligned to the fly genome using HISAT2. Both the FR and RF parameters were used initially to determine the best method. The links to these database files can be found in the 'Data Source' section. Samples were take at Day 4 after synchronization at occlusion.
+
+[**HISAT**]{.underline}
+
+1\. Download the Drosophila melanogaster reference genome from the provided URL.
+
+2\. Index the reference genome using HISAT2:
+
+**hisat2-build dmel-all-chromosome-r6.53.fasta dmel_index**
+
+3\. Download the RNA-seq data for the testis and ovary from the provided URLs.
+
+4\. Map the reads to the reference genome for both testis and ovary samples using HISAT2 with both FR and RF strand specificity options:
+
+For FR strand specificity:
+
+**hisat2 -x dmel_index -1 testis_replicate1_R1.fastq.gz -2 testis_replicate1_R2.fastq.gz -S testis_replicate1_FR.sam \--rna-strandness FR**
+
+**hisat2 -x dmel_index -1 testis_replicate2_R1.fastq.gz -2 testis_replicate2_R2.fastq.gz -S testis_replicate2_FR.sam \--rna-strandness FR**
+
+For RF strand specificity:
+
+**hisat2 -x dmel_index -1 testis_replicate1_R1.fastq.gz -2 testis_replicate1_R2.fastq.gz -S testis_replicate1_RF.sam \--rna-strandness RF**
+
+**hisat2 -x dmel_index -1 testis_replicate2_R1.fastq.gz -2 testis_replicate2_R2.fastq.gz -S testis_replicate2_RF.sam \--rna-strandness RF**
+
+5.Convert the SAM files to BAM format using samtools view:
+
+**samtools view -b -o testis_replicate1_FR.bam testis_replicate1_FR.sam**
+
+**samtools view -b -o testis_replicate2_FR.bam testis_replicate2_FR.sam**
+
+**samtools view -b -o testis_replicate1_RF.bam testis_replicate1_RF.sam**
+
+**samtools view -b -o testis_replicate2_RF.bam testis_replicate2_RF.sam**
+
+6\. Choose the strand specificity option (FR or RF) that resulted in the largest number of paired alignments for further analysis.
+
+#### Transcript Quantification
+
+[**Quantification**]{.underline}
+
+HISAT2 was used to also output a SAM file with gene counts, which was then passed to StringTie. StringTie was used to compile a GTF file including details of all the aligned reads, such as chromosome location, start/end position, gene id, etc. This file also contains columns 7-9, which calculate coverage, TPM (transcripts per million), and FPKM (fragements per kilobase of transcript per million reads mapped).
+
+1.  Download the genome annotation file in GTF format from the provided URL.
+2.  Sort the bam files.
+
+**samtools sort -o testis_replicate1_FR_sorted.bam testis_replicate1_FR.bam**
+
+**samtools sort -o testis_replicate2_FR_sorted.bam testis_replicate2_FR.bam**
+
+**samtools sort -o ovary_replicate1_FR_sorted.bam ovary_replicate1_FR.bam**
+
+**samtools sort -o ovary_replicate2_FR_sorted.bam ovary_replicate2_FR.bam**
+
+3.  Quantify read counts per genes and transcripts for both testis and ovary samples using StringTie. Make sure to specify the strand specificity option (FR or RF) that you chose in Task 1. Use the -G option to provide the genome annotation file to flag known genes or transcripts.
+
+For transcript abundance,
+
+**stringtie testis_replicate1_FR_sorted.bam -G dmel-all-r6.53.gtf -o testis_replicate1_FR.gtf -e -A transcript_abundance_testis_replicate1.tab**
+
+**stringtie testis_replicate2_FR_sorted.bam -G dmel-all-r6.53.gtf -o testis_replicate2_FR.gtf -e -A transcript_abundance_testis_replicate2.tab**
+
+**stringtie ovary_replicate1_FR_sorted.bam -G dmel-all-r6.53.gtf -o ovary_replicate1_FR.gtf -e -A transcript_abundance_ovary_replicate1.tab**
+
+**stringtie ovary_replicate2_FR_sorted.bam -G dmel-all-r6.53.gtf -o ovary_replicate2_FR.gtf -e -A transcript_abundance_ovary_replicate2.tab**
+
+4.  For filtering the genes from the output gtf,
+
+**awk '\$3 == "transcript"' testis_replicate1_FR.gtf \> filtered_testis_replicate1_FR.gtf**
+
+**awk '\$3 == "transcript"' testis_replicate2_FR.gtf \> filtered_testis_replicate2_FR.gtf**
+
+**awk '\$3 == "transcript"' ovary_replicate1_FR.gtf \> filtered_ovary_replicate1_FR.gtf**
+
+**awk '\$3 == "transcript"' ovary_replicate2_FR.gtf \> filtered_ovary_replicate2_FR.gtf**
+
+For gene abundance,
+
+**awk -F"\\t" 'BEGIN { OFS = "\\t" } {**
+
+**split(\$9, attrs, /;/);**
+
+**transcript_id = gensub(/.\*transcript_id "(\[\^;\]+)".\*/, "\\\\1", "g", \$9);**
+
+**transcript_name = "-";**
+
+**reference = \$1;**
+
+**strand = \$7;**
+
+**start = \$4;**
+
+**end = \$5;**
+
+**coverage = gensub(/.\*cov "(\[\^;\]+)".\*/, "\\\\1", "g", \$9);**
+
+**fpkm = gensub(/.\*FPKM "(\[\^;\]+)".\*/, "\\\\1", "g", \$9);**
+
+**tpm = gensub(/.\*TPM "(\[\^;\]+)".\*/, "\\\\1", "g", \$9);**
+
+**print transcript_id, transcript_name, reference, strand, start, end, coverage, fpkm, tpm;**
+
+**}' filtered_testis_replicate1_FR.gtf \> gene_abundance_testis_replicate1.tab**
+
+Repeat this process for other samples too.
+
+#### Genes and Transcripts of high fold-change
+
+GTF files of genes and transcripts were imported into R, where the remaining calculations were done. Replicate files were merged and average read counts for each gene in the ovary and testis were calculated. These were used to calculate log fold change in expression as follows:
+
+![](Screenshot%202023-10-11%20224859.png)
+
+The results are displayed as heatmaps to visualize the log fold change in genes and transcripts between the two tissues.
+
+## Discussion
+
+**Results**
+
+We found that each replicate of the paired-end read files varies in their alignment to the genome as expected, due to natural variation from animal to animal and the quality of the samples. We found that the overall alignment rates of the paired-end reads to the genome were between 88-91% and reads that matched exactly one time comprised 52-55% of the paired matches.
+
+Focusing first on the genes of highest and lowest fold change, we observe that a majority of the high-fold change genes in the ovary are ribosomal, and the other two are involved in the vitelline membrane (26Aa) and gonad formation (14-3-3ε ). The lowest fold-change genes in the ovary were typically related to developmental processes of sensory organs, and one was a long non-coding RNA.
+
+In the testis tissues, the highest-fold change (HFC) genes genes show another ribosomal protien, and a few genes associated with sexual reproduction (FBgn0036091) and testis (FBgn0039104). The lowest fold-change (LFC) genes are involved in mtDNA replication, proteolysis, and muscle glutamate receptors.
+
+Next, the HFC transcripts in the ovary are nearly all associated with protien biosynthesis and include ribosomal proteins and a molecular chaperone. Most of the LFC transcripts were either non-coding RNAs or the biological process it was involved in was unknown.
+
+In the testis tissue, most of the HFC transcripts are involved in sexual reproduction. LFC transcripts function in chromatin remodeling, neuromuscular junctions expansion, and form an RNA polymerase III subunit.
+
+When he check to see if top transcripts are located in the same region of the genome where the top genes are, we found that 3 of the top 5 ovary transcripts with the HFC did. In the testis, only one of the LFC transcripts mapped to the same region of the genome.
+
+**Significance of Results**
+
+While sex-specific genes were expected to be in the top hits of genes and transcripts, it was not expected that many of the other hits were involved in transcription and protein synthesis. It is important to reflect on the biological system in question and determine if the results are logical based on what is known. Spermatogenesis (sperm formation) and oogenesis (egg formation) are active processes throughout the life of the fruit fly, so it makes sense that transcription would be highly active in these tissues (2). We can conclude that many of the components involved in transcription are highly upregulated in the reproductive tissues as well as those involved in sexual reproduction.
+
+**Challenges**
+
+One of the challenges of working with the data was using the Linux command prompts to run some of the programs, as most of our previous experience is with Python and R programming languages. In addition, these programs require large amounts of memory to run, so ensuring that you have you have the computing power to run and manage the size of the data sets.
+
+Th authors do want to mention there might be a discrepancy in the code for the highest and lowest fold changes in the gene/transcripts of the testis tissues and the heatmaps. The labels were switched based on the value ranges, which may not align exactly with the code. There were no issues with the ovary heatmaps.
+
+**Future Work**
+
+Since this study focuses on gene expression in the reproductive tissues of male and female fruit flies, it may be interesting to analyze other tissue samples to determine if those differences extend beyond the testis and ovaries. In EF's own research on cancer therapies, we observe a sex bias in particular tumor models, both in the growth rate of tumors and tumor response to therapy. Since the fruit fly is a popular model for human disease, it may be important to determine if there is any differential expression of genes involved in the immune response as it may play a role in the efficacy of treatment.
+
+## Conclusions
+
+The ability to analyze large data sets is critical to the continued progression of scientific research as the technology to generate the data improves. In this study, we were able to obtain not only the read counts for genes and transcripts in the ovary and testis tissues, but also go a step further and determine the genes/transcripts with the highest and lowest fold changes between the different samples.
+
+Our work was able to determine that genes that produce different components of transcription or aid the process were found to have the highest fold change in both tissues. We were also able to extract sex-specific genes, such as those associated with the vitelline membrane or the testis/sexual reproduction.
+
+The significance of this work is the ability to extract biological information from thousands of short RNA sequence reads. Transcript expression is critical to biological functions and the misregulation of these transcripts, and therefore protein expression, can cause disruption in their function and lead to disease. Cancer, for example, typically occurs when the cell cycle continues without control, leading to tumor growth and possibly metastasis which can become life-threatening.
+
+These types of studies play an important role in genetic research, greatly amplifying the scale at which we can compare biological conditions. In many cases, these studies are used to determine target genes for further study by narrowing the focus of the research question. Streamlining the research process could decrease the time between experiments, therefore allowing for more work to be done in a shorter period of time.
+
+## Distribution of Work
+
+Indronil Bhattacharjee (IB) and Erica Flores (EF) both contributed to the project. IB provided the coding for data analysis and produced the outputs and figures. EF provided some biology background to help shape the code, compiled the Gene/Transcript Function Summary Tables, and wrote the report.
+
+## References
+
+1.  Stephenson R, Metcalfe NH. Drosophila melanogaster: a fly through its history and current use. J R Coll Physicians Edinb. 2013;43(1):70-5. doi: 10.4997/JRCPE.2013.116. PMID: 23516695.
+2.  de Cuevas, M. (2015). *Drosophila* Oogenesis. In eLS, John Wiley & Sons, Ltd (Ed.). <https://doi.org/10.1002/9780470015902.a0001502.pub2>

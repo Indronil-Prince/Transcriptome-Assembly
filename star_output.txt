@@ -1,0 +1,58 @@
+#Calculate the total number of reads in the SAM/BAM file
+samtools view -c -F 260 testis_replicate1_Aligned.sortedByCoord.out.bam > total_reads_testis_replicate1_STAR.txt
+
+#Calculate the number of uniquely aligned reads
+samtools view -c -F 4 -q 255 testis_replicate1_Aligned.sortedByCoord.out.bam > uniquely_aligned_reads_testis_replicate1_STAR.txt
+
+#Calculate the percentage of uniquely aligned reads
+total_reads_STAR=$(cat total_reads_testis_replicate1_STAR.txt)
+uniquely_aligned_STAR=$(cat uniquely_aligned_reads_testis_replicate1_STAR.txt)
+percentage_STAR=$(bc <<< "scale=2; ($uniquely_aligned_STAR / $total_reads_STAR) * 100")
+
+echo "Total Reads STAR: $total_reads_STAR"
+echo "Uniquely Aligned STAR: $uniquely_aligned_STAR"
+echo "Percentage Uniquely Aligned STAR: $percentage_STAR%"
+
+------------------------------------------------------------------
+
+Testis_Replicate_1_STAR
+=========================================
+Total Reads STAR: 11013738
+Uniquely Aligned STAR: 10666458
+Percentage Uniquely Aligned STAR: 96.00%
+
+Testis_Replicate_2_STAR
+=========================================
+Total Reads STAR: 9018430
+Uniquely Aligned STAR: 8803576
+Percentage Uniquely Aligned STAR: 97.00%
+
+Ovary_Replicate_1_STAR
+=========================================
+Total Reads STAR: 16200742
+Uniquely Aligned STAR: 15970700
+Percentage Uniquely Aligned STAR: 98.00%
+
+Ovary_Replicate_2_STAR
+=========================================
+Total Reads STAR: 11354930
+Uniquely Aligned STAR: 11192892
+Percentage Uniquely Aligned STAR: 98.00%
+
+------------------------------------------------------------------
+
+Testis_replicate1_HISAT
+=========================================
+Total Reads: 10343346
+
+Testis_replicate2_HISAT
+=========================================
+Total Reads: 8421960
+
+Ovary_replicate1_HISAT
+=========================================
+Total Reads: 15183182
+
+Ovary_replicate2_HISAT
+=========================================
+Total Reads: 10601218

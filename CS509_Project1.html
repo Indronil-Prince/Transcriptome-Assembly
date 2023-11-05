@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.433">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>CS509 - Project 1</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="CS509_Project1_files/libs/clipboard/clipboard.min.js"></script>
+<script src="CS509_Project1_files/libs/quarto-html/quarto.js"></script>
+<script src="CS509_Project1_files/libs/quarto-html/popper.min.js"></script>
+<script src="CS509_Project1_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="CS509_Project1_files/libs/quarto-html/anchor.min.js"></script>
+<link href="CS509_Project1_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="CS509_Project1_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="CS509_Project1_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="CS509_Project1_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="CS509_Project1_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">CS509 - Project 1</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="fruit-fly-genome-and-differential-expression-in-reproductive-tissues" class="level1">
+<h1>Fruit Fly Genome and Differential Expression in Reproductive Tissues</h1>
+<section id="indronil-bhattacharjee-ib-and-erica-flores-ef" class="level4">
+<h4 class="anchored" data-anchor-id="indronil-bhattacharjee-ib-and-erica-flores-ef">Indronil Bhattacharjee (IB) and Erica Flores (EF)</h4>
+</section>
+<section id="abstract" class="level2">
+<h2 class="anchored" data-anchor-id="abstract">Abstract</h2>
+<p>Scientific research continues to trend toward experimentation that produces high-throughput data, necessitating a partnership between research and computer programming, particularly in the field of molecular biology. RNA sequencing is a common technique in molecular studies, providing total transcript expression data from biological samples. Using a statistical analysis program/language such as R, large data frames containing millions of reads can be interpreted to understand differential gene expression between multiple samples. In this study, we utilize several public databases and free software to download and interpret gene expression in the ovaries and testis of the fruit fly. We found that the overall alignment rates of the paired-end reads to the genome were between 88-91% and reads that matched exactly one time comprised 52-55% of the paired matches. Top hits genes and transcripts were typically associated with transcription or related to sexual reproduction, while lowest hits revealed non-coding RNAs or their biological function was unknown. The ability to compare entire transcriptomes between biological samples is incredibly useful, allowing for faster data analysis and subsequently more information in order to target specific genes for further studies.</p>
+</section>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Bioinformatics is a growing interdisciplinary field, which lies at the intersection of biology and computational analysis. With the modern advancements in molecular biology, it is now more feasible for researchers to conduct experiments that generate high-throughput data sets, resulting in a need for both an understanding of computer programming and an understanding of the biological processes involved.</p>
+<p>RNA sequencing is an example of such an experiment, generating thousands or millions of sequence reads that need to be interpreted in a biological context. By mapping these reads to an annotated genome and generating read counts, we can calculate the difference in gene expression between different biological samples. For example, you could determine how the expression profile of tumor cells changes in response to a cancer drug or compare the expression of specific genes in different tissues or compare different time points during embryonic development.</p>
+<p>For this study, we are particularly interested in the differential gene counts and transcripts in the reproductive tissues (ovary and testis) of the fruit fly. The fruit fly, <em>drosophila melanogaster</em>, has played a critical role in the advancement of our understanding of genetics, neuroscience, and disease (1). The extensive use of this model has resulted in an abundance of molecular data available in scientific databases, including a well-annotated genome. We are particularly interested in the top genes and transcripts that have the highest and lowest fold change between the two tissues.</p>
+</section>
+<section id="results" class="level2">
+<h2 class="anchored" data-anchor-id="results">Results</h2>
+<section id="transcriptome-assembly" class="level4">
+<h4 class="anchored" data-anchor-id="transcriptome-assembly"><strong>1. Transcriptome Assembly</strong></h4>
+<p>For each reproductive tissue (ovary and testis), two replicates of paired-end reads were individually aligned to the genome using the FR and RF parameters for strand specificity, resulting in 8 outputs. As expected, the overall alignment rate varied between the replicates. When we compare the alignment for individual replicates using either setting (FR or RF) for strand specificity, the outputs are identical.</p>
+<p>For the testis samples, the overall alignment rate was 88.08% for replicate 1 and 90.29% for replicate 2 (Fig 1-2). In the ovary samples, the overall alignment rate was 90.01% in replicate 1 and 91.03% in replicate 2 (Fig 3-4). We found that the overall alignment rates of the paired-end reads to the genome were between 88-91% and reads that matched exactly one time comprised 52-55% of the paired matches.</p>
+<p><strong>Figures 1-4: HISAT2 alignment outputs - Testis 1, Testis 2, Ovary 1, Ovary 2</strong></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="hisat-output/testis1.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">HISAT2 - Testis 1</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="hisat-output/testis2.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">HISAT2 - Testis 1</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="hisat-output/ovary1.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">HISAT2 - Ovary 1</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="hisat-output/ovary2.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">HISAT2 - Ovary 2</figcaption>
+</figure>
+</div>
+</section>
+<section id="transcriptome-quantification" class="level4">
+<h4 class="anchored" data-anchor-id="transcriptome-quantification"><strong>2. Transcriptome Quantification</strong></h4>
+<p>The output of Stringtie is a GTF of all the aligned reads for each sample of genes and transcripts, which includes abundance data, FPKM and TPM, as well. These files will be included with the submission but, for the purpose of the report, we show the first few rows of each sample for genes and transcripts.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load necessary libraries</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'tidyverse' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'ggplot2' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'tibble' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'tidyr' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'readr' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'purrr' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'dplyr' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'stringr' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'forcats' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'lubridate' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.3     ✔ readr     2.1.4
+✔ forcats   1.0.0     ✔ stringr   1.5.0
+✔ ggplot2   3.4.3     ✔ tibble    3.2.1
+✔ lubridate 1.9.3     ✔ tidyr     1.3.0
+✔ purrr     1.0.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the transcript abundance data for both ovary and testis replicates</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>ovary_replicate1_transcript <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">"transcript_abundance_ovary_replicate1.tab"</span>, <span class="at">header =</span> <span class="cn">TRUE</span>, <span class="at">sep =</span> <span class="st">"</span><span class="sc">\t</span><span class="st">"</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>ovary_replicate2_transcript <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">"transcript_abundance_ovary_replicate2.tab"</span>, <span class="at">header =</span> <span class="cn">TRUE</span>, <span class="at">sep =</span> <span class="st">"</span><span class="sc">\t</span><span class="st">"</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>testis_replicate1_transcript <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">"transcript_abundance_testis_replicate1.tab"</span>, <span class="at">header =</span> <span class="cn">TRUE</span>, <span class="at">sep =</span> <span class="st">"</span><span class="sc">\t</span><span class="st">"</span>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>testis_replicate2_transcript <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">"transcript_abundance_testis_replicate1.tab"</span>, <span class="at">header =</span> <span class="cn">TRUE</span>, <span class="at">sep =</span> <span class="st">"</span><span class="sc">\t</span><span class="st">"</span>)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the gene abundance data for both ovary and testis replicates</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>ovary_replicate1_gene <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">"gene_abundance_ovary_replicate1.tab"</span>, <span class="at">header =</span> <span class="cn">TRUE</span>, <span class="at">sep =</span> <span class="st">"</span><span class="sc">\t</span><span class="st">"</span>)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>ovary_replicate2_gene <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">"gene_abundance_ovary_replicate2.tab"</span>, <span class="at">header =</span> <span class="cn">TRUE</span>, <span class="at">sep =</span> <span class="st">"</span><span class="sc">\t</span><span class="st">"</span>)</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>testis_replicate1_gene <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">"gene_abundance_testis_replicate1.tab"</span>, <span class="at">header =</span> <span class="cn">TRUE</span>, <span class="at">sep =</span> <span class="st">"</span><span class="sc">\t</span><span class="st">"</span>)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>testis_replicate2_gene <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">"gene_abundance_testis_replicate2.tab"</span>, <span class="at">header =</span> <span class="cn">TRUE</span>, <span class="at">sep =</span> <span class="st">"</span><span class="sc">\t</span><span class="st">"</span>)</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="co">#print rows to report gene abundance </span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(ovary_replicate1_gene)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      Gene.ID Gene.Name Reference Strand Start   End  Coverage      FPKM
+1 FBgn0031208         -        2L      +  7529  9484  0.462234  0.307535
+2 FBgn0002121         -        2L      -  9839 21376 41.767136 31.712936
+3 FBgn0051973         -        2L      - 25402 65404  0.503833  0.524640
+4 FBgn0267987         -        2L      + 54817 55767  0.000000  0.000000
+5 FBgn0266879         -        2L      + 66318 66524  0.000000  0.000000
+6 FBgn0067779         -        2L      + 66482 71390 32.008511 24.743692
+        TPM
+1  0.766298
+2 79.020485
+3  1.307268
+4  0.000000
+5  0.000000
+6 61.654926</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(ovary_replicate2_gene)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      Gene.ID Gene.Name Reference Strand Start   End  Coverage      FPKM
+1 FBgn0031208         -        2L      +  7529  9484  0.179787  0.171182
+2 FBgn0002121         -        2L      -  9839 21376 26.942322 29.362421
+3 FBgn0031209         -        2L      - 21823 25155  0.000000  0.000000
+4 FBgn0263584         -        2L      + 21952 24237  0.232735  0.221595
+5 FBgn0051973         -        2L      - 25402 65404  0.338708  0.504750
+6 FBgn0267987         -        2L      + 54817 55767  0.161935  0.154184
+        TPM
+1  0.394298
+2 67.633194
+3  0.000000
+4  0.510421
+5  1.162637
+6  0.355146</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(testis_replicate1_gene)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      Gene.ID Gene.Name Reference Strand Start   End  Coverage      FPKM
+1 FBgn0031208         -        2L      +  7529  9484 51.843086 50.786350
+2 FBgn0002121         -        2L      -  9839 21376  1.240430  1.336045
+3 FBgn0031209         -        2L      - 21823 25155  0.000000  0.000000
+4 FBgn0263584         -        2L      + 21952 24237  0.408072  0.399754
+5 FBgn0051973         -        2L      - 25402 65404  0.545158  0.835253
+6 FBgn0267987         -        2L      + 54817 55767  0.957939  0.938413
+        TPM
+1 75.254364
+2  1.979730
+3  0.000000
+4  0.592349
+5  1.237663
+6  1.390525</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(testis_replicate2_gene)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      Gene.ID Gene.Name Reference Strand Start   End  Coverage      FPKM
+1 FBgn0031208         -        2L      +  7529  9484 51.432980 61.989746
+2 FBgn0002121         -        2L      -  9839 21376  1.116486  1.479531
+3 FBgn0031209         -        2L      - 21823 25155  0.000000  0.000000
+4 FBgn0263584         -        2L      + 21952 24237  0.852915  1.027978
+5 FBgn0051973         -        2L      - 25402 65404  0.912768  1.790706
+6 FBgn0267987         -        2L      + 54817 55767  0.000000  0.000000
+         TPM
+1 119.639702
+2   2.855483
+3   0.000000
+4   1.983990
+5   3.456047
+6   0.000000</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">#print rows o report transcript abundance</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(ovary_replicate1_transcript)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Transcript.ID Transcript.Name Reference Strand Start   End Coverage     FPKM
+1   FBtr0475186               -        2L      +  7529  9484 0.462234 0.307535
+2   FBtr0078166               -        2L      -  9839 21376 0.000000 0.000000
+3   FBtr0078167               -        2L      -  9839 21376 0.000000 0.000000
+4   FBtr0078169               -        2L      -  9839 21376 0.000000 0.000000
+5   FBtr0306589               -        2L      -  9839 21376 0.000000 0.000000
+6   FBtr0306590               -        2L      -  9839 21376 0.000000 0.000000
+       TPM
+1 0.766298
+2 0.000000
+3 0.000000
+4 0.000000
+5 0.000000
+6 0.000000</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(ovary_replicate2_transcript)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Transcript.ID Transcript.Name Reference Strand Start   End Coverage     FPKM
+1   FBtr0475186               -        2L      +  7529  9484 0.179787 0.171182
+2   FBtr0078171               -        2L      -  9839 18570 0.000000 0.000000
+3   FBtr0078166               -        2L      -  9839 21376 0.000000 0.000000
+4   FBtr0078167               -        2L      -  9839 21376 0.000000 0.000000
+5   FBtr0078168               -        2L      -  9839 21376 0.000000 0.000000
+6   FBtr0078169               -        2L      -  9839 21376 0.000000 0.000000
+       TPM
+1 0.394298
+2 0.000000
+3 0.000000
+4 0.000000
+5 0.000000
+6 0.000000</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(testis_replicate1_transcript)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Transcript.ID Transcript.Name Reference Strand Start   End Coverage     FPKM
+1   FBtr0475186               -        2L      +  7529  9484 51.84309 50.78635
+2   FBtr0078170               -        2L      -  9839 18570  0.00000  0.00000
+3   FBtr0078171               -        2L      -  9839 18570  0.00000  0.00000
+4   FBtr0078166               -        2L      -  9839 21376  0.00000  0.00000
+5   FBtr0078167               -        2L      -  9839 21376  0.00000  0.00000
+6   FBtr0078168               -        2L      -  9839 21376  0.00000  0.00000
+       TPM
+1 75.25436
+2  0.00000
+3  0.00000
+4  0.00000
+5  0.00000
+6  0.00000</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(testis_replicate2_transcript)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Transcript.ID Transcript.Name Reference Strand Start   End Coverage     FPKM
+1   FBtr0475186               -        2L      +  7529  9484 51.84309 50.78635
+2   FBtr0078170               -        2L      -  9839 18570  0.00000  0.00000
+3   FBtr0078171               -        2L      -  9839 18570  0.00000  0.00000
+4   FBtr0078166               -        2L      -  9839 21376  0.00000  0.00000
+5   FBtr0078167               -        2L      -  9839 21376  0.00000  0.00000
+6   FBtr0078168               -        2L      -  9839 21376  0.00000  0.00000
+       TPM
+1 75.25436
+2  0.00000
+3  0.00000
+4  0.00000
+5  0.00000
+6  0.00000</code></pre>
+</div>
+</div>
+</section>
+<section id="genes-and-transcripts-of-high-fold-change" class="level4">
+<h4 class="anchored" data-anchor-id="genes-and-transcripts-of-high-fold-change"><strong>3. Genes and Transcripts of High Fold-Change</strong></h4>
+<p>Replicate data was merged, in order to create a single file for each tissue and the log fold change for each gene or transcript was calculated. This data is visualized as heatmaps for the top genes or transcripts with the highest and lowest fold changes between the tissues. Abundance metrics include TPM and FPKM, and coverage was included as well.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>testis_merged_gene <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(testis_replicate1_gene, testis_replicate2_gene)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>ovary_merged_gene <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(ovary_replicate1_gene, ovary_replicate2_gene)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the average gene abundance for ovary and testis</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>avg_abundance_ovary <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(ovary_merged_gene[, <span class="dv">7</span><span class="sc">:</span><span class="dv">9</span>])</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>avg_abundance_testis <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(testis_merged_gene[, <span class="dv">7</span><span class="sc">:</span><span class="dv">9</span>])</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the log fold change (r_g)</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>log_fold_change_gene <span class="ot">&lt;-</span> <span class="fu">log2</span>((<span class="dv">1</span> <span class="sc">+</span> avg_abundance_ovary) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> avg_abundance_testis))</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>testis_merged_transcript <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(testis_replicate1_transcript, testis_replicate2_transcript)</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>ovary_merged_transcript <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(ovary_replicate1_transcript, ovary_replicate2_transcript)</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the average transcript abundance for ovary and testis</span></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>avg_abundance_ovary <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(ovary_merged_transcript[, <span class="dv">7</span><span class="sc">:</span><span class="dv">9</span>])</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>avg_abundance_testis <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(testis_merged_transcript[, <span class="dv">7</span><span class="sc">:</span><span class="dv">9</span>])</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the log fold change (r_g)</span></span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>log_fold_change_transcript <span class="ot">&lt;-</span> <span class="fu">log2</span>((<span class="dv">1</span> <span class="sc">+</span> avg_abundance_ovary) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> avg_abundance_testis))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Genes - Testis Highest and Lowest Fold Change</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add the log fold change values to the data</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>testis_merged_gene<span class="sc">$</span>log_fold_change_gene <span class="ot">&lt;-</span> log_fold_change_gene</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="co">#HIGHEST</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Find the top genes with the greatest and lowest log fold change values</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>top_genes_greatest <span class="ot">&lt;-</span> testis_merged_gene <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(log_fold_change_gene)) <span class="sc">%&gt;%</span> <span class="fu">head</span>(<span class="dv">5</span>)</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the expression of top genes using a boxplot</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Assuming the columns "Coverage" to "TPM" represent expression values</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>top_genes_names_greatest <span class="ot">&lt;-</span> <span class="fu">c</span>(top_genes_greatest<span class="sc">$</span>Gene.ID)</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>top_testis_genes_highest <span class="ot">&lt;-</span> top_genes_names_greatest</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter data for topgenes</span></span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>testis_merged_gene_filtered <span class="ot">&lt;-</span> testis_merged_gene <span class="sc">%&gt;%</span></span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Gene.ID <span class="sc">%in%</span> top_genes_names_greatest)</span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Pivot the data for heatmap visualization</span></span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>heatmap_data <span class="ot">&lt;-</span> testis_merged_gene_filtered <span class="sc">%&gt;%</span></span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Gene.ID, Coverage<span class="sc">:</span>TPM) <span class="sc">%&gt;%</span></span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>Gene.ID, <span class="at">names_to =</span> <span class="st">"Expression"</span>, <span class="at">values_to =</span> <span class="st">"Value"</span>)</span>
+<span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a heatmap</span></span>
+<span id="cb30-24"><a href="#cb30-24" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repr.plot.width =</span> <span class="dv">6</span>, <span class="at">repr.plot.height =</span> <span class="dv">4</span>) </span>
+<span id="cb30-25"><a href="#cb30-25" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(heatmap_data, <span class="fu">aes</span>(<span class="at">x =</span> Gene.ID, <span class="at">y =</span> Expression, <span class="at">fill =</span> Value)) <span class="sc">+</span></span>
+<span id="cb30-26"><a href="#cb30-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>() <span class="sc">+</span></span>
+<span id="cb30-27"><a href="#cb30-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(<span class="at">low =</span> <span class="st">"lightblue"</span>, <span class="at">high =</span> <span class="st">"darkblue"</span>) <span class="sc">+</span></span>
+<span id="cb30-28"><a href="#cb30-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Heatmap of Expression for Top Testis Genes (Lowest Log Fold Change)"</span>,</span>
+<span id="cb30-29"><a href="#cb30-29" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Gene"</span>,</span>
+<span id="cb30-30"><a href="#cb30-30" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Expression Type"</span>) <span class="sc">+</span></span>
+<span id="cb30-31"><a href="#cb30-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, <span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb30-32"><a href="#cb30-32" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>),<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="CS509_Project1_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co">#LOWEST</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>top_genes_lowest <span class="ot">&lt;-</span> testis_merged_gene <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(log_fold_change_gene) <span class="sc">%&gt;%</span> <span class="fu">head</span>(<span class="dv">5</span>)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>top_genes_names_lowest <span class="ot">&lt;-</span> <span class="fu">c</span>(top_genes_lowest<span class="sc">$</span>Gene.ID)</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>top_testis_genes_lowest <span class="ot">&lt;-</span> top_genes_names_lowest</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter data for top genes</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>testis_merged_gene_filtered <span class="ot">&lt;-</span> testis_merged_gene <span class="sc">%&gt;%</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Gene.ID <span class="sc">%in%</span> top_genes_names_lowest)</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Pivot the data for heatmap visualization</span></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>heatmap_data <span class="ot">&lt;-</span> testis_merged_gene_filtered <span class="sc">%&gt;%</span></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Gene.ID, Coverage<span class="sc">:</span>TPM) <span class="sc">%&gt;%</span></span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>Gene.ID, <span class="at">names_to =</span> <span class="st">"Expression"</span>, <span class="at">values_to =</span> <span class="st">"Value"</span>)</span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a heatmap</span></span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repr.plot.width =</span> <span class="dv">10</span>, <span class="at">repr.plot.height =</span> <span class="dv">8</span>) </span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(heatmap_data, <span class="fu">aes</span>(<span class="at">x =</span> Gene.ID, <span class="at">y =</span> Expression, <span class="at">fill =</span> Value)) <span class="sc">+</span></span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>() <span class="sc">+</span></span>
+<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(<span class="at">low =</span> <span class="st">"lightblue"</span>, <span class="at">high =</span> <span class="st">"darkblue"</span>) <span class="sc">+</span></span>
+<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Heatmap of Expression for Top Testis Genes (Highest Log Fold Change)"</span>,</span>
+<span id="cb31-21"><a href="#cb31-21" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Gene"</span>,</span>
+<span id="cb31-22"><a href="#cb31-22" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Expression Type"</span>) <span class="sc">+</span></span>
+<span id="cb31-23"><a href="#cb31-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, <span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb31-24"><a href="#cb31-24" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>),<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="CS509_Project1_files/figure-html/unnamed-chunk-3-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p><strong>Genes - Ovary Highest and Lowest Fold Change</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add the log fold change values to the data</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>ovary_merged_gene<span class="sc">$</span>log_fold_change_gene <span class="ot">&lt;-</span> log_fold_change_gene</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="co">#HIGHEST</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Find the top genes with the greatest and lowest log fold change values</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>top_genes_greatest <span class="ot">&lt;-</span> ovary_merged_gene <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(log_fold_change_gene)) <span class="sc">%&gt;%</span> <span class="fu">head</span>(<span class="dv">5</span>)</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the expression of top genes using a boxplot</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Assuming the columns "Coverage" to "TPM" represent expression values</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>top_genes_names_greatest <span class="ot">&lt;-</span> <span class="fu">c</span>(top_genes_greatest<span class="sc">$</span>Gene.ID)</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>top_ovary_genes_highest <span class="ot">&lt;-</span> top_genes_names_greatest</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter data for top genes</span></span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>ovary_merged_gene_filtered <span class="ot">&lt;-</span> ovary_merged_gene <span class="sc">%&gt;%</span></span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Gene.ID <span class="sc">%in%</span> top_genes_names_greatest)</span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Pivot the data for heatmap visualization</span></span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>heatmap_data <span class="ot">&lt;-</span> ovary_merged_gene_filtered <span class="sc">%&gt;%</span></span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Gene.ID, Coverage<span class="sc">:</span>TPM) <span class="sc">%&gt;%</span></span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>Gene.ID, <span class="at">names_to =</span> <span class="st">"Expression"</span>, <span class="at">values_to =</span> <span class="st">"Value"</span>)</span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a heatmap</span></span>
+<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repr.plot.width =</span> <span class="dv">10</span>, <span class="at">repr.plot.height =</span> <span class="dv">8</span>) </span>
+<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(heatmap_data, <span class="fu">aes</span>(<span class="at">x =</span> Gene.ID, <span class="at">y =</span> Expression, <span class="at">fill =</span> Value)) <span class="sc">+</span></span>
+<span id="cb32-26"><a href="#cb32-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>() <span class="sc">+</span></span>
+<span id="cb32-27"><a href="#cb32-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(<span class="at">low =</span> <span class="st">"lightblue"</span>, <span class="at">high =</span> <span class="st">"darkblue"</span>) <span class="sc">+</span></span>
+<span id="cb32-28"><a href="#cb32-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Heatmap of Expression for Top Ovary Genes (Highest Log Fold Change)"</span>,</span>
+<span id="cb32-29"><a href="#cb32-29" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Gene"</span>,</span>
+<span id="cb32-30"><a href="#cb32-30" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Expression Type"</span>) <span class="sc">+</span></span>
+<span id="cb32-31"><a href="#cb32-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, <span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb32-32"><a href="#cb32-32" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>),<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="CS509_Project1_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co">#LOWESTgene</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>top_genes_lowest <span class="ot">&lt;-</span> ovary_merged_gene <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(log_fold_change_gene) <span class="sc">%&gt;%</span> <span class="fu">head</span>(<span class="dv">5</span>)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>top_genes_names_lowest <span class="ot">&lt;-</span> <span class="fu">c</span>(top_genes_lowest<span class="sc">$</span>Gene.ID)</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>top_ovary_genes_lowest <span class="ot">&lt;-</span> top_genes_names_lowest</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter data for top genes</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>ovary_merged_gene_filtered <span class="ot">&lt;-</span> ovary_merged_gene <span class="sc">%&gt;%</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Gene.ID <span class="sc">%in%</span> top_genes_names_lowest)</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Pivot the data for heatmap visualization</span></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>heatmap_data <span class="ot">&lt;-</span> ovary_merged_gene_filtered <span class="sc">%&gt;%</span></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Gene.ID, Coverage<span class="sc">:</span>TPM) <span class="sc">%&gt;%</span></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>Gene.ID, <span class="at">names_to =</span> <span class="st">"Expression"</span>, <span class="at">values_to =</span> <span class="st">"Value"</span>)</span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a heatmap</span></span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repr.plot.width =</span> <span class="dv">10</span>, <span class="at">repr.plot.height =</span> <span class="dv">8</span>) </span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(heatmap_data, <span class="fu">aes</span>(<span class="at">x =</span> Gene.ID, <span class="at">y =</span> Expression, <span class="at">fill =</span> Value)) <span class="sc">+</span></span>
+<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>() <span class="sc">+</span></span>
+<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(<span class="at">low =</span> <span class="st">"lightblue"</span>, <span class="at">high =</span> <span class="st">"darkblue"</span>) <span class="sc">+</span></span>
+<span id="cb33-20"><a href="#cb33-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Heatmap of Expression for Top Ovary Genes (Lowest Log Fold Change)"</span>,</span>
+<span id="cb33-21"><a href="#cb33-21" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Gene"</span>,</span>
+<span id="cb33-22"><a href="#cb33-22" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Expression Type"</span>) <span class="sc">+</span></span>
+<span id="cb33-23"><a href="#cb33-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, <span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb33-24"><a href="#cb33-24" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>),<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="CS509_Project1_files/figure-html/unnamed-chunk-4-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p><strong>Transcripts - Testis Highest and Lowest Fold Change</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add the log fold change values to the data</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>testis_merged_transcript<span class="sc">$</span>log_fold_change_transcript <span class="ot">&lt;-</span> log_fold_change_transcript</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="co">#HIGHEST</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Find the top transcripts with the greatest and lowest log fold change values</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>top_transcripts_greatest <span class="ot">&lt;-</span> testis_merged_transcript <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(log_fold_change_transcript)) <span class="sc">%&gt;%</span> <span class="fu">head</span>(<span class="dv">5</span>)</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the expression of top transcripts using a boxplot</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Assuming the columns "Coverage" to "TPM" represent expression values</span></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>top_transcripts_names_greatest <span class="ot">&lt;-</span> <span class="fu">c</span>(top_transcripts_greatest<span class="sc">$</span>Transcript.ID)</span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>top_testis_transcripts_highest <span class="ot">&lt;-</span> top_transcripts_names_greatest</span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter data for top transcripts</span></span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>testis_merged_transcript_filtered <span class="ot">&lt;-</span> testis_merged_transcript <span class="sc">%&gt;%</span></span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Transcript.ID <span class="sc">%in%</span> top_transcripts_names_greatest)</span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Pivot the data for heatmap visualization</span></span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a>heatmap_data <span class="ot">&lt;-</span> testis_merged_transcript_filtered <span class="sc">%&gt;%</span></span>
+<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Transcript.ID, Coverage<span class="sc">:</span>TPM) <span class="sc">%&gt;%</span></span>
+<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>Transcript.ID, <span class="at">names_to =</span> <span class="st">"Expression"</span>, <span class="at">values_to =</span> <span class="st">"Value"</span>)</span>
+<span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-23"><a href="#cb34-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a heatmap</span></span>
+<span id="cb34-24"><a href="#cb34-24" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repr.plot.width =</span> <span class="dv">10</span>, <span class="at">repr.plot.height =</span> <span class="dv">8</span>) </span>
+<span id="cb34-25"><a href="#cb34-25" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(heatmap_data, <span class="fu">aes</span>(<span class="at">x =</span> Transcript.ID, <span class="at">y =</span> Expression, <span class="at">fill =</span> Value)) <span class="sc">+</span></span>
+<span id="cb34-26"><a href="#cb34-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>() <span class="sc">+</span></span>
+<span id="cb34-27"><a href="#cb34-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(<span class="at">low =</span> <span class="st">"lightblue"</span>, <span class="at">high =</span> <span class="st">"darkblue"</span>) <span class="sc">+</span></span>
+<span id="cb34-28"><a href="#cb34-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Heatmap of Expression for Top Testis Transcripts (Lowest Log Fold Change)"</span>,</span>
+<span id="cb34-29"><a href="#cb34-29" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Transcript"</span>,</span>
+<span id="cb34-30"><a href="#cb34-30" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Expression Type"</span>) <span class="sc">+</span></span>
+<span id="cb34-31"><a href="#cb34-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, <span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb34-32"><a href="#cb34-32" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>),<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="CS509_Project1_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co">#LOWEST</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>top_transcripts_lowest <span class="ot">&lt;-</span> testis_merged_transcript <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(log_fold_change_transcript) <span class="sc">%&gt;%</span> <span class="fu">head</span>(<span class="dv">5</span>)</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>top_transcripts_names_lowest <span class="ot">&lt;-</span> <span class="fu">c</span>(top_transcripts_lowest<span class="sc">$</span>Transcript.ID)</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>top_testis_transcripts_lowest <span class="ot">&lt;-</span> top_transcripts_names_lowest</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter data for top transcripts</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>testis_merged_transcript_filtered <span class="ot">&lt;-</span> testis_merged_transcript <span class="sc">%&gt;%</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Transcript.ID <span class="sc">%in%</span> top_transcripts_names_lowest)</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Pivot the data for heatmap visualization</span></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>heatmap_data <span class="ot">&lt;-</span> testis_merged_transcript_filtered <span class="sc">%&gt;%</span></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Transcript.ID, Coverage<span class="sc">:</span>TPM) <span class="sc">%&gt;%</span></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>Transcript.ID, <span class="at">names_to =</span> <span class="st">"Expression"</span>, <span class="at">values_to =</span> <span class="st">"Value"</span>)</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a heatmap</span></span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repr.plot.width =</span> <span class="dv">10</span>, <span class="at">repr.plot.height =</span> <span class="dv">8</span>) </span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(heatmap_data, <span class="fu">aes</span>(<span class="at">x =</span> Transcript.ID, <span class="at">y =</span> Expression, <span class="at">fill =</span> Value)) <span class="sc">+</span></span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>() <span class="sc">+</span></span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(<span class="at">low =</span> <span class="st">"lightblue"</span>, <span class="at">high =</span> <span class="st">"darkblue"</span>) <span class="sc">+</span></span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Heatmap of Expression for Top Testis Transcripts (Highest Log Fold Change)"</span>,</span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Transcript"</span>,</span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Expression Type"</span>) <span class="sc">+</span></span>
+<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, <span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>),<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="CS509_Project1_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p><strong>Transcripts - Ovary Highest and Lowest Fold Change</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add the log fold change values to the data</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>ovary_merged_transcript<span class="sc">$</span>log_fold_change_transcript <span class="ot">&lt;-</span> log_fold_change_transcript</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="co">#HIGHEST</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Find the top transcripts with the greatest and lowest log fold change values</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>top_transcripts_greatest <span class="ot">&lt;-</span> ovary_merged_transcript <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(log_fold_change_transcript)) <span class="sc">%&gt;%</span> <span class="fu">head</span>(<span class="dv">5</span>)</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the expression of top transcripts using a boxplot</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Assuming the columns "Coverage" to "TPM" represent expression values</span></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>top_transcripts_names_greatest <span class="ot">&lt;-</span> <span class="fu">c</span>(top_transcripts_greatest<span class="sc">$</span>Transcript.ID)</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>top_ovary_transcripts_highest <span class="ot">&lt;-</span> top_transcripts_names_greatest</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter data for top transcripts</span></span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>ovary_merged_transcript_filtered <span class="ot">&lt;-</span> ovary_merged_transcript <span class="sc">%&gt;%</span></span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Transcript.ID <span class="sc">%in%</span> top_transcripts_names_greatest)</span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Pivot the data for heatmap visualization</span></span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>heatmap_data <span class="ot">&lt;-</span> ovary_merged_transcript_filtered <span class="sc">%&gt;%</span></span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Transcript.ID, Coverage<span class="sc">:</span>TPM) <span class="sc">%&gt;%</span></span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>Transcript.ID, <span class="at">names_to =</span> <span class="st">"Expression"</span>, <span class="at">values_to =</span> <span class="st">"Value"</span>)</span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a heatmap</span></span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repr.plot.width =</span> <span class="dv">10</span>, <span class="at">repr.plot.height =</span> <span class="dv">8</span>) </span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(heatmap_data, <span class="fu">aes</span>(<span class="at">x =</span> Transcript.ID, <span class="at">y =</span> Expression, <span class="at">fill =</span> Value)) <span class="sc">+</span></span>
+<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>() <span class="sc">+</span></span>
+<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(<span class="at">low =</span> <span class="st">"lightblue"</span>, <span class="at">high =</span> <span class="st">"darkblue"</span>) <span class="sc">+</span></span>
+<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Heatmap of Expression for Top Ovary Transcripts (Highest Log Fold Change)"</span>,</span>
+<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Transcript"</span>,</span>
+<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Expression Type"</span>) <span class="sc">+</span></span>
+<span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">16</span>, <span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb36-32"><a href="#cb36-32" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">16</span>),<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="CS509_Project1_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co">#LOWEST</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>top_transcripts_lowest <span class="ot">&lt;-</span> ovary_merged_transcript <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(log_fold_change_transcript) <span class="sc">%&gt;%</span> <span class="fu">head</span>(<span class="dv">5</span>)</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>top_transcripts_names_lowest <span class="ot">&lt;-</span> <span class="fu">c</span>(top_transcripts_lowest<span class="sc">$</span>Transcript.ID)</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>top_ovary_transcripts_lowest <span class="ot">&lt;-</span> top_transcripts_names_lowest</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter data for top transcripts</span></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>ovary_merged_transcript_filtered <span class="ot">&lt;-</span> ovary_merged_transcript <span class="sc">%&gt;%</span></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Transcript.ID <span class="sc">%in%</span> top_transcripts_names_lowest)</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Pivot the data for heatmap visualization</span></span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>heatmap_data <span class="ot">&lt;-</span> ovary_merged_transcript_filtered <span class="sc">%&gt;%</span></span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Transcript.ID, Coverage<span class="sc">:</span>TPM) <span class="sc">%&gt;%</span></span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>Transcript.ID, <span class="at">names_to =</span> <span class="st">"Expression"</span>, <span class="at">values_to =</span> <span class="st">"Value"</span>)</span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a heatmap</span></span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repr.plot.width =</span> <span class="dv">10</span>, <span class="at">repr.plot.height =</span> <span class="dv">8</span>) </span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(heatmap_data, <span class="fu">aes</span>(<span class="at">x =</span> Transcript.ID, <span class="at">y =</span> Expression, <span class="at">fill =</span> Value)) <span class="sc">+</span></span>
+<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>() <span class="sc">+</span></span>
+<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(<span class="at">low =</span> <span class="st">"lightblue"</span>, <span class="at">high =</span> <span class="st">"darkblue"</span>) <span class="sc">+</span></span>
+<span id="cb37-20"><a href="#cb37-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Heatmap of Expression for Top Ovary Transcripts (Lowest Log Fold Change)"</span>,</span>
+<span id="cb37-21"><a href="#cb37-21" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Transcript"</span>,</span>
+<span id="cb37-22"><a href="#cb37-22" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Expression Type"</span>) <span class="sc">+</span></span>
+<span id="cb37-23"><a href="#cb37-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">16</span>, <span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb37-24"><a href="#cb37-24" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">16</span>),<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="CS509_Project1_files/figure-html/unnamed-chunk-6-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p><strong>Summary Table for Gene/Transcript Functions of Top Hits</strong></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Top%20Hits%20Function%20Tables/Ovary_gene_table.png" class="img-fluid figure-img" width="541"></p>
+<figcaption class="figure-caption">Ovary Genes</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Top%20Hits%20Function%20Tables/testis_gene_table.png" class="img-fluid figure-img" width="543"></p>
+<figcaption class="figure-caption">Testis Genes</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Top%20Hits%20Function%20Tables/ovary_transcript_table.png" class="img-fluid figure-img" width="542"></p>
+<figcaption class="figure-caption">Ovary Transcripts</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Top%20Hits%20Function%20Tables/testis_transcript_table.png" class="img-fluid figure-img" width="545"></p>
+<figcaption class="figure-caption">Testis Transcripts</figcaption>
+</figure>
+</div>
+<p><strong>Top Transcripts located within genomic region of top genes</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Top Testis Genes and Transcripts with lowest Log Fold Change</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Top Testis Genes and Transcripts with lowest Log Fold Change</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"============================================================</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>============================================================</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>filtered_gene_data <span class="ot">&lt;-</span> testis_merged_gene <span class="sc">%&gt;%</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Gene.ID <span class="sc">%in%</span> top_testis_genes_lowest)</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract the start and end positions for the selected genes</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>gene_ids <span class="ot">&lt;-</span> <span class="fu">unique</span>(filtered_gene_data<span class="sc">$</span>Gene.ID)</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>gene_start_positions <span class="ot">&lt;-</span> <span class="fu">unique</span>(filtered_gene_data<span class="sc">$</span>Start)</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>gene_end_positions <span class="ot">&lt;-</span> <span class="fu">unique</span>(filtered_gene_data<span class="sc">$</span>End)</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>filtered_transcript_data <span class="ot">&lt;-</span> testis_merged_transcript <span class="sc">%&gt;%</span></span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Transcript.ID <span class="sc">%in%</span> top_testis_transcripts_lowest)</span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract the start and end positions for the selected transcripts</span></span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>transcript_ids <span class="ot">&lt;-</span> <span class="fu">unique</span>(filtered_transcript_data<span class="sc">$</span>Transcript.ID)</span>
+<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a>transcripts_start_positions <span class="ot">&lt;-</span> <span class="fu">unique</span>(filtered_transcript_data<span class="sc">$</span>Start)</span>
+<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a>transcripts_end_positions <span class="ot">&lt;-</span> <span class="fu">unique</span>(filtered_transcript_data<span class="sc">$</span>End)</span>
+<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-18"><a href="#cb42-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (x <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(transcripts_start_positions)) {</span>
+<span id="cb42-19"><a href="#cb42-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (y <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(gene_start_positions)) {</span>
+<span id="cb42-20"><a href="#cb42-20" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span>(gene_end_positions[y] <span class="sc">&gt;=</span> transcripts_end_positions[x] <span class="sc">&amp;</span> gene_start_positions[y] <span class="sc">&lt;=</span> transcripts_start_positions[x])</span>
+<span id="cb42-21"><a href="#cb42-21" aria-hidden="true" tabindex="-1"></a>      {</span>
+<span id="cb42-22"><a href="#cb42-22" aria-hidden="true" tabindex="-1"></a>          <span class="fu">cat</span>(<span class="st">"Transcript"</span>, transcript_ids[x], <span class="st">" is in genomic region of "</span>, gene_ids[y], <span class="st">"gene</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb42-23"><a href="#cb42-23" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb42-24"><a href="#cb42-24" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb42-25"><a href="#cb42-25" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Transcript FBtr0076256  is in genomic region of  FBgn0036091 gene</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Top Ovary Genes and Transcripts with highest Log Fold Change</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Top Ovary Genes and Transcripts with highest Log Fold Change</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"============================================================</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>============================================================</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>filtered_gene_data <span class="ot">&lt;-</span> ovary_merged_gene <span class="sc">%&gt;%</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Gene.ID <span class="sc">%in%</span> top_ovary_genes_highest)</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract the start and end positions for the selected genes</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>gene_ids <span class="ot">&lt;-</span> <span class="fu">unique</span>(filtered_gene_data<span class="sc">$</span>Gene.ID)</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>gene_start_positions <span class="ot">&lt;-</span> <span class="fu">unique</span>(filtered_gene_data<span class="sc">$</span>Start)</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>gene_end_positions <span class="ot">&lt;-</span> <span class="fu">unique</span>(filtered_gene_data<span class="sc">$</span>End)</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>filtered_transcript_data <span class="ot">&lt;-</span> ovary_merged_transcript <span class="sc">%&gt;%</span></span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Transcript.ID <span class="sc">%in%</span> top_ovary_transcripts_highest)</span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract the start and end positions for the selected transcripts</span></span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a>transcript_ids <span class="ot">&lt;-</span> <span class="fu">unique</span>(filtered_transcript_data<span class="sc">$</span>Transcript.ID)</span>
+<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a>transcripts_start_positions <span class="ot">&lt;-</span> <span class="fu">unique</span>(filtered_transcript_data<span class="sc">$</span>Start)</span>
+<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a>transcripts_end_positions <span class="ot">&lt;-</span> <span class="fu">unique</span>(filtered_transcript_data<span class="sc">$</span>End)</span>
+<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (x <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(transcripts_start_positions)) {</span>
+<span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (y <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(gene_start_positions)) {</span>
+<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span>(gene_end_positions[y] <span class="sc">&gt;=</span> transcripts_end_positions[x] <span class="sc">&amp;</span> gene_start_positions[y] <span class="sc">&lt;=</span> transcripts_start_positions[x])</span>
+<span id="cb48-21"><a href="#cb48-21" aria-hidden="true" tabindex="-1"></a>      {</span>
+<span id="cb48-22"><a href="#cb48-22" aria-hidden="true" tabindex="-1"></a>          <span class="fu">cat</span>(<span class="st">"Transcript"</span>, transcript_ids[x], <span class="st">" is in genomic region of "</span>, gene_ids[y], <span class="st">"gene</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb48-23"><a href="#cb48-23" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb48-24"><a href="#cb48-24" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb48-25"><a href="#cb48-25" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Transcript FBtr0100231  is in genomic region of  FBgn0066084 gene
+Transcript FBtr0083565  is in genomic region of  FBgn0020238 gene
+Transcript FBtr0083964  is in genomic region of  FBgn0019936 gene</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="data-source" class="level2">
+<h2 class="anchored" data-anchor-id="data-source">Data Source</h2>
+<section id="genome-sequence-and-annotation-files-were-acquired-from-flybase." class="level4">
+<h4 class="anchored" data-anchor-id="genome-sequence-and-annotation-files-were-acquired-from-flybase.">Genome sequence and annotation files were acquired from FlyBase.</h4>
+<p>Genome Sequence File - FlyBase (FB2023_04)</p>
+<p><a href="http://ftp.flybase.net/releases/FB2023_04/dmel_r6.53/fasta/dmel-all-chromosome-r6.53.fasta.gz" class="uri">http://ftp.flybase.net/releases/FB2023_04/dmel_r6.53/fasta/dmel-all-chromosome-r6.53.fasta.gz</a></p>
+<p>Genome Annotation File - FlyBase</p>
+<p><a href="http://ftp.flybase.net/releases/FB2023_04/dmel_r6.53/gtf/dmel-all-r6.53.gtf.gz" class="uri">http://ftp.flybase.net/releases/FB2023_04/dmel_r6.53/gtf/dmel-all-r6.53.gtf.gz</a></p>
+</section>
+<section id="rna-seq-for-fly-testis-and-ovary-were-acquired-from-the-encode-project." class="level4">
+<h4 class="anchored" data-anchor-id="rna-seq-for-fly-testis-and-ovary-were-acquired-from-the-encode-project.">RNA-seq for Fly Testis and Ovary were acquired from the Encode Project.</h4>
+<p>RNAseq - Testis - Encode Project</p>
+<p><a href="https://www.encodeproject.org/experiments/ENCSR254JFC/" class="uri">https://www.encodeproject.org/experiments/ENCSR254JFC/</a></p>
+<p>RNAseq - Ovary - Encode Project</p>
+<p><a href="https://www.encodeproject.org/experiments/ENCSR272DXE/" class="uri">https://www.encodeproject.org/experiments/ENCSR272DXE/</a></p>
+</section>
+</section>
+<section id="methods" class="level2">
+<h2 class="anchored" data-anchor-id="methods">Methods</h2>
+<section id="software" class="level4">
+<h4 class="anchored" data-anchor-id="software">Software</h4>
+<p>R Studio - R version 4.2.2 (2022-10-31 urct)</p>
+<p>Jupyter Notebook</p>
+<p>HISAT2 - HISAT2 2.2.1</p>
+<p>Bowtie2-2.5.1</p>
+</section>
+<section id="transcriptome-assembly-1" class="level4">
+<h4 class="anchored" data-anchor-id="transcriptome-assembly-1">Transcriptome Assembly</h4>
+<p>Two replicates of ovary sequence reads and two replicates of testis sequence reads were individually aligned to the fly genome using HISAT2. Both the FR and RF parameters were used initially to determine the best method. The links to these database files can be found in the ‘Data Source’ section. Samples were take at Day 4 after synchronization at occlusion.</p>
+<p><u><strong>HISAT</strong></u></p>
+<p>1. Download the Drosophila melanogaster reference genome from the provided URL.</p>
+<p>2. Index the reference genome using HISAT2:</p>
+<p><strong>hisat2-build dmel-all-chromosome-r6.53.fasta dmel_index</strong></p>
+<p>3. Download the RNA-seq data for the testis and ovary from the provided URLs.</p>
+<p>4. Map the reads to the reference genome for both testis and ovary samples using HISAT2 with both FR and RF strand specificity options:</p>
+<p>For FR strand specificity:</p>
+<p><strong>hisat2 -x dmel_index -1 testis_replicate1_R1.fastq.gz -2 testis_replicate1_R2.fastq.gz -S testis_replicate1_FR.sam --rna-strandness FR</strong></p>
+<p><strong>hisat2 -x dmel_index -1 testis_replicate2_R1.fastq.gz -2 testis_replicate2_R2.fastq.gz -S testis_replicate2_FR.sam --rna-strandness FR</strong></p>
+<p>For RF strand specificity:</p>
+<p><strong>hisat2 -x dmel_index -1 testis_replicate1_R1.fastq.gz -2 testis_replicate1_R2.fastq.gz -S testis_replicate1_RF.sam --rna-strandness RF</strong></p>
+<p><strong>hisat2 -x dmel_index -1 testis_replicate2_R1.fastq.gz -2 testis_replicate2_R2.fastq.gz -S testis_replicate2_RF.sam --rna-strandness RF</strong></p>
+<p>5.Convert the SAM files to BAM format using samtools view:</p>
+<p><strong>samtools view -b -o testis_replicate1_FR.bam testis_replicate1_FR.sam</strong></p>
+<p><strong>samtools view -b -o testis_replicate2_FR.bam testis_replicate2_FR.sam</strong></p>
+<p><strong>samtools view -b -o testis_replicate1_RF.bam testis_replicate1_RF.sam</strong></p>
+<p><strong>samtools view -b -o testis_replicate2_RF.bam testis_replicate2_RF.sam</strong></p>
+<p>6. Choose the strand specificity option (FR or RF) that resulted in the largest number of paired alignments for further analysis.</p>
+</section>
+<section id="transcript-quantification" class="level4">
+<h4 class="anchored" data-anchor-id="transcript-quantification">Transcript Quantification</h4>
+<p><u><strong>Quantification</strong></u></p>
+<p>HISAT2 was used to also output a SAM file with gene counts, which was then passed to StringTie. StringTie was used to compile a GTF file including details of all the aligned reads, such as chromosome location, start/end position, gene id, etc. This file also contains columns 7-9, which calculate coverage, TPM (transcripts per million), and FPKM (fragements per kilobase of transcript per million reads mapped).</p>
+<ol type="1">
+<li>Download the genome annotation file in GTF format from the provided URL.</li>
+<li>Sort the bam files.</li>
+</ol>
+<p><strong>samtools sort -o testis_replicate1_FR_sorted.bam testis_replicate1_FR.bam</strong></p>
+<p><strong>samtools sort -o testis_replicate2_FR_sorted.bam testis_replicate2_FR.bam</strong></p>
+<p><strong>samtools sort -o ovary_replicate1_FR_sorted.bam ovary_replicate1_FR.bam</strong></p>
+<p><strong>samtools sort -o ovary_replicate2_FR_sorted.bam ovary_replicate2_FR.bam</strong></p>
+<ol start="3" type="1">
+<li>Quantify read counts per genes and transcripts for both testis and ovary samples using StringTie. Make sure to specify the strand specificity option (FR or RF) that you chose in Task 1. Use the -G option to provide the genome annotation file to flag known genes or transcripts.</li>
+</ol>
+<p>For transcript abundance,</p>
+<p><strong>stringtie testis_replicate1_FR_sorted.bam -G dmel-all-r6.53.gtf -o testis_replicate1_FR.gtf -e -A transcript_abundance_testis_replicate1.tab</strong></p>
+<p><strong>stringtie testis_replicate2_FR_sorted.bam -G dmel-all-r6.53.gtf -o testis_replicate2_FR.gtf -e -A transcript_abundance_testis_replicate2.tab</strong></p>
+<p><strong>stringtie ovary_replicate1_FR_sorted.bam -G dmel-all-r6.53.gtf -o ovary_replicate1_FR.gtf -e -A transcript_abundance_ovary_replicate1.tab</strong></p>
+<p><strong>stringtie ovary_replicate2_FR_sorted.bam -G dmel-all-r6.53.gtf -o ovary_replicate2_FR.gtf -e -A transcript_abundance_ovary_replicate2.tab</strong></p>
+<ol start="4" type="1">
+<li>For filtering the genes from the output gtf,</li>
+</ol>
+<p><strong>awk ‘$3 == “transcript”’ testis_replicate1_FR.gtf &gt; filtered_testis_replicate1_FR.gtf</strong></p>
+<p><strong>awk ‘$3 == “transcript”’ testis_replicate2_FR.gtf &gt; filtered_testis_replicate2_FR.gtf</strong></p>
+<p><strong>awk ‘$3 == “transcript”’ ovary_replicate1_FR.gtf &gt; filtered_ovary_replicate1_FR.gtf</strong></p>
+<p><strong>awk ‘$3 == “transcript”’ ovary_replicate2_FR.gtf &gt; filtered_ovary_replicate2_FR.gtf</strong></p>
+<p>For gene abundance,</p>
+<p><strong>awk -F”\t” ’BEGIN { OFS = “\t” } {</strong></p>
+<p><strong>split($9, attrs, /;/);</strong></p>
+<p><strong>transcript_id = gensub(/.*transcript_id “([^;]+)”.*/, “\\1”, “g”, $9);</strong></p>
+<p><strong>transcript_name = “-”;</strong></p>
+<p><strong>reference = $1;</strong></p>
+<p><strong>strand = $7;</strong></p>
+<p><strong>start = $4;</strong></p>
+<p><strong>end = $5;</strong></p>
+<p><strong>coverage = gensub(/.*cov “([^;]+)”.*/, “\\1”, “g”, $9);</strong></p>
+<p><strong>fpkm = gensub(/.*FPKM “([^;]+)”.*/, “\\1”, “g”, $9);</strong></p>
+<p><strong>tpm = gensub(/.*TPM “([^;]+)”.*/, “\\1”, “g”, $9);</strong></p>
+<p><strong>print transcript_id, transcript_name, reference, strand, start, end, coverage, fpkm, tpm;</strong></p>
+<p><strong>}’ filtered_testis_replicate1_FR.gtf &gt; gene_abundance_testis_replicate1.tab</strong></p>
+<p>Repeat this process for other samples too.</p>
+</section>
+<section id="genes-and-transcripts-of-high-fold-change-1" class="level4">
+<h4 class="anchored" data-anchor-id="genes-and-transcripts-of-high-fold-change-1">Genes and Transcripts of high fold-change</h4>
+<p>GTF files of genes and transcripts were imported into R, where the remaining calculations were done. Replicate files were merged and average read counts for each gene in the ovary and testis were calculated. These were used to calculate log fold change in expression as follows:</p>
+<p><img src="Screenshot%202023-10-11%20224859.png" class="img-fluid"></p>
+<p>The results are displayed as heatmaps to visualize the log fold change in genes and transcripts between the two tissues.</p>
+</section>
+</section>
+<section id="discussion" class="level2">
+<h2 class="anchored" data-anchor-id="discussion">Discussion</h2>
+<p><strong>Results</strong></p>
+<p>We found that each replicate of the paired-end read files varies in their alignment to the genome as expected, due to natural variation from animal to animal and the quality of the samples. We found that the overall alignment rates of the paired-end reads to the genome were between 88-91% and reads that matched exactly one time comprised 52-55% of the paired matches.</p>
+<p>Focusing first on the genes of highest and lowest fold change, we observe that a majority of the high-fold change genes in the ovary are ribosomal, and the other two are involved in the vitelline membrane (26Aa) and gonad formation (14-3-3ε&nbsp;). The lowest fold-change genes in the ovary were typically related to developmental processes of sensory organs, and one was a long non-coding RNA.</p>
+<p>In the testis tissues, the highest-fold change (HFC) genes genes show another ribosomal protien, and a few genes associated with sexual reproduction (FBgn0036091) and testis (FBgn0039104). The lowest fold-change (LFC) genes are involved in mtDNA replication, proteolysis, and muscle glutamate receptors.</p>
+<p>Next, the HFC transcripts in the ovary are nearly all associated with protien biosynthesis and include ribosomal proteins and a molecular chaperone. Most of the LFC transcripts were either non-coding RNAs or the biological process it was involved in was unknown.</p>
+<p>In the testis tissue, most of the HFC transcripts are involved in sexual reproduction. LFC transcripts function in chromatin remodeling, neuromuscular junctions expansion, and form an RNA polymerase III subunit.</p>
+<p>When he check to see if top transcripts are located in the same region of the genome where the top genes are, we found that 3 of the top 5 ovary transcripts with the HFC did. In the testis, only one of the LFC transcripts mapped to the same region of the genome.</p>
+<p><strong>Significance of Results</strong></p>
+<p>While sex-specific genes were expected to be in the top hits of genes and transcripts, it was not expected that many of the other hits were involved in transcription and protein synthesis. It is important to reflect on the biological system in question and determine if the results are logical based on what is known. Spermatogenesis (sperm formation) and oogenesis (egg formation) are active processes throughout the life of the fruit fly, so it makes sense that transcription would be highly active in these tissues (2). We can conclude that many of the components involved in transcription are highly upregulated in the reproductive tissues as well as those involved in sexual reproduction.</p>
+<p><strong>Challenges</strong></p>
+<p>One of the challenges of working with the data was using the Linux command prompts to run some of the programs, as most of our previous experience is with Python and R programming languages. In addition, these programs require large amounts of memory to run, so ensuring that you have you have the computing power to run and manage the size of the data sets.</p>
+<p>Th authors do want to mention there might be a discrepancy in the code for the highest and lowest fold changes in the gene/transcripts of the testis tissues and the heatmaps. The labels were switched based on the value ranges, which may not align exactly with the code. There were no issues with the ovary heatmaps.</p>
+<p><strong>Future Work</strong></p>
+<p>Since this study focuses on gene expression in the reproductive tissues of male and female fruit flies, it may be interesting to analyze other tissue samples to determine if those differences extend beyond the testis and ovaries. In EF’s own research on cancer therapies, we observe a sex bias in particular tumor models, both in the growth rate of tumors and tumor response to therapy. Since the fruit fly is a popular model for human disease, it may be important to determine if there is any differential expression of genes involved in the immune response as it may play a role in the efficacy of treatment.</p>
+</section>
+<section id="conclusions" class="level2">
+<h2 class="anchored" data-anchor-id="conclusions">Conclusions</h2>
+<p>The ability to analyze large data sets is critical to the continued progression of scientific research as the technology to generate the data improves. In this study, we were able to obtain not only the read counts for genes and transcripts in the ovary and testis tissues, but also go a step further and determine the genes/transcripts with the highest and lowest fold changes between the different samples.</p>
+<p>Our work was able to determine that genes that produce different components of transcription or aid the process were found to have the highest fold change in both tissues. We were also able to extract sex-specific genes, such as those associated with the vitelline membrane or the testis/sexual reproduction.</p>
+<p>The significance of this work is the ability to extract biological information from thousands of short RNA sequence reads. Transcript expression is critical to biological functions and the misregulation of these transcripts, and therefore protein expression, can cause disruption in their function and lead to disease. Cancer, for example, typically occurs when the cell cycle continues without control, leading to tumor growth and possibly metastasis which can become life-threatening.</p>
+<p>These types of studies play an important role in genetic research, greatly amplifying the scale at which we can compare biological conditions. In many cases, these studies are used to determine target genes for further study by narrowing the focus of the research question. Streamlining the research process could decrease the time between experiments, therefore allowing for more work to be done in a shorter period of time.</p>
+</section>
+<section id="distribution-of-work" class="level2">
+<h2 class="anchored" data-anchor-id="distribution-of-work">Distribution of Work</h2>
+<p>Indronil Bhattacharjee (IB) and Erica Flores (EF) both contributed to the project. IB provided the coding for data analysis and produced the outputs and figures. EF provided some biology background to help shape the code, compiled the Gene/Transcript Function Summary Tables, and wrote the report.</p>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ol type="1">
+<li>Stephenson R, Metcalfe NH. Drosophila melanogaster: a fly through its history and current use. J R Coll Physicians Edinb. 2013;43(1):70-5. doi: 10.4997/JRCPE.2013.116. PMID: 23516695.</li>
+<li>de Cuevas, M. (2015).&nbsp;<em>Drosophila</em>&nbsp;Oogenesis. In eLS, John Wiley &amp; Sons, Ltd (Ed.).&nbsp;<a href="https://doi.org/10.1002/9780470015902.a0001502.pub2" class="uri">https://doi.org/10.1002/9780470015902.a0001502.pub2</a></li>
+</ol>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

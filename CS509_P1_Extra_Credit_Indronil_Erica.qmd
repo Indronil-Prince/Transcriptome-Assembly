@@ -1,0 +1,368 @@
+---
+title: Project 1. Transcriptome Assembly (Extra Tasks)
+jupyter:
+  kernelspec:
+    display_name: R
+    language: R
+    name: ir
+---
+
+
+**Indronil Bhattacharjee, Erica Flores**
+
+
+#### Task E1: Using STAR
+
+**E1.1** The STAR aligner was used to map the RNA-seq reads to the reference genome. The comparison of the results from STAR and HISAT2, in terms of the numbers or percentages of reads uniquely aligned to the reference genome is in the following -
+
+| Sample | STAR Reads | STAR Percentage | HISAT2 Reads | HISAT2 Percentage |
+| --- | --- | --- | --- | --- 
+| Testis_Replicate_1 | 11013738 | 96% | 10343346 | 89% |
+| Testis_Replicate_2 | 9018430 | 97% | 8421960 | 90% |
+| Ovary_Replicate_1 | 16200742 | 98% | 15183182 | 91% |
+| Ovary_Replicate_2 | 11354930 | 98% | 10601218 | 91% |
+
+**E1.2** STAR by default generated a tab-separated file (“SJ.out.tab”) that contains all unique splicing junctions and the number of reads that cross each splicing junction. 
+
+Here is the R code to map the junctions to known genes if the start and end sites of a junction are entirely contained within a gene on the chromosome.
+
+```{r}
+#| execution: {iopub.execute_input: '2023-10-18T22:16:07.606973Z', iopub.status.busy: '2023-10-18T22:16:07.604089Z', iopub.status.idle: '2023-10-18T22:16:07.642432Z'}
+#| trusted: true
+#| vscode: {languageId: r}
+library(dplyr)
+```
+
+```{r}
+#| execution: {iopub.execute_input: '2023-10-18T22:16:07.647437Z', iopub.status.busy: '2023-10-18T22:16:07.645748Z', iopub.status.idle: '2023-10-18T22:16:35.549505Z'}
+#| trusted: true
+#| vscode: {languageId: r}
+gtf_file <- "/kaggle/input/star-fruit-fly-ovary-and-testis-splicing-junctions/genes_only.gtf"
+
+# Create an empty data frame to store gene information
+genes <- data.frame()
+
+# Read the GTF file line by line
+con <- file(gtf_file, "r")
+while (length(line <- readLines(con, n = 1)) > 0) {
+  if (!grepl("^#", line)) {
+    fields <- unlist(strsplit(line, "\t"))
+    
+    if (fields[3] == "gene") {
+      # Extract gene ID from the attributes field
+      gene_id <- gsub(".*gene_id \"(.*?)\";.*", "\\1", fields[9])
+      
+      # Create a data frame with gene information
+      gene_info <- data.frame(
+        chromosome = fields[1],
+        start = as.numeric(fields[4]),
+        end = as.numeric(fields[5]),
+        gene_id = gene_id
+      )
+      
+      # Append the gene_info to the genes data frame
+      genes <- rbind(genes, gene_info)
+    }
+  }
+}
+close(con)
+```
+
+**Splice-gene mapping function**
+
+```{r}
+#| _kg_hide-output: true
+#| execution: {iopub.execute_input: '2023-10-18T22:16:35.553520Z', iopub.status.busy: '2023-10-18T22:16:35.552121Z', iopub.status.idle: '2023-10-18T22:16:35.565042Z'}
+#| trusted: true
+#| vscode: {languageId: r}
+splice.gene.mapping <- function(sj_data){
+    # Create an empty data frame to store the mapping of splice junctions to genes
+    sj_to_gene_mapping <- data.frame(chromosome = sj_data$chromosome, start = sj_data$start, end = sj_data$end, total_reads = sj_data$unique_reads+sj_data$multi_reads)
+
+    # Add a column to store the mapped gene IDs
+    sj_to_gene_mapping$gene_id <- NA
+
+    suppressWarnings({
+    # Iterate through each splice junction
+    for (i in 1:nrow(sj_to_gene_mapping)) {
+      # Find the gene that contains the splice junction
+      gene_id <- genes$gene_id[genes$chromosome == sj_to_gene_mapping$chromosome[i] &
+                            genes$start <= sj_to_gene_mapping$start[i] &
+                            genes$end >= sj_to_gene_mapping$end[i]]
+  
+      # If a gene is found, add its ID to the sj_to_gene_mapping data frame
+      if (length(gene_id) > 0) {
+        sj_to_gene_mapping$gene_id[i] <- gene_id
+      } else {
+        sj_to_gene_mapping$gene_id[i] <- NA
+      }
+    }}) 
+    sj_to_gene_mapping_out <- sj_to_gene_mapping[!is.na(sj_to_gene_mapping$gene_id), ]
+    return (sj_to_gene_mapping_out)
+}  
+```
+
+```{r}
+#| execution: {iopub.execute_input: '2023-10-18T22:16:35.568937Z', iopub.status.busy: '2023-10-18T22:16:35.567623Z', iopub.status.idle: '2023-10-18T22:16:44.947409Z'}
+#| trusted: true
+#| vscode: {languageId: r}
+sj_file <- "/kaggle/input/star-fruit-fly-ovary-and-testis-splicing-junctions/testis_replicate1_SJ.out.tab"
+
+# Read the SJ.out.tab file into a data frame
+sj_data <- read.table(sj_file, header = FALSE, sep = "\t")
+colnames(sj_data) <- c("chromosome", "start", "end", "strand", "intron_motif", "intron_annotation", "unique_reads", "multi_reads", "max_overhang")
+
+sj_to_gene_mapping <- splice.gene.mapping(sj_data)
+head(sj_to_gene_mapping,10)
+```
+
+```{r}
+#| execution: {iopub.execute_input: '2023-10-18T22:16:44.951560Z', iopub.status.busy: '2023-10-18T22:16:44.950161Z', iopub.status.idle: '2023-10-18T22:16:59.664878Z'}
+#| trusted: true
+#| vscode: {languageId: r}
+sj_file <- "/kaggle/input/star-fruit-fly-ovary-and-testis-splicing-junctions/ovary_replicate1_SJ.out.tab"
+
+# Read the SJ.out.tab file into a data frame
+sj_data <- read.table(sj_file, header = FALSE, sep = "\t")
+colnames(sj_data) <- c("chromosome", "start", "end", "strand", "intron_motif", "intron_annotation", "unique_reads", "multi_reads", "max_overhang")
+sj_to_gene_mapping <- splice.gene.mapping(sj_data)
+head(sj_to_gene_mapping,10)
+```
+
+**E1.3** Top 5 splice junctions of high fold-change and low fold-change using the formula from Task 3.
+
+```{r}
+#| execution: {iopub.execute_input: '2023-10-18T22:16:59.669988Z', iopub.status.busy: '2023-10-18T22:16:59.668633Z', iopub.status.idle: '2023-10-18T22:16:59.685897Z'}
+#| trusted: true
+#| vscode: {languageId: r}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+```
+
+**Between Replicates 1**
+
+```{r}
+#| execution: {iopub.execute_input: '2023-10-18T22:16:59.689903Z', iopub.status.busy: '2023-10-18T22:16:59.688641Z', iopub.status.idle: '2023-10-18T22:17:00.161287Z'}
+#| trusted: true
+#| vscode: {languageId: r}
+# Read the SJ.out.tab file into a data frame
+testis_replicate1 <- read.table("/kaggle/input/star-fruit-fly-ovary-and-testis-splicing-junctions/testis_replicate1_SJ.out.tab", header = FALSE, sep = "\t")
+testis_replicate2 <- read.table("/kaggle/input/star-fruit-fly-ovary-and-testis-splicing-junctions/testis_replicate2_SJ.out.tab", header = FALSE, sep = "\t")
+ovary_replicate1 <- read.table("/kaggle/input/star-fruit-fly-ovary-and-testis-splicing-junctions/ovary_replicate1_SJ.out.tab", header = FALSE, sep = "\t")
+ovary_replicate2 <- read.table("/kaggle/input/star-fruit-fly-ovary-and-testis-splicing-junctions/ovary_replicate2_SJ.out.tab", header = FALSE, sep = "\t")
+
+testis_merged <- testis_replicate1 %>% semi_join(ovary_replicate1, by = c("V2", "V3"))
+ovary_merged <- ovary_replicate1 %>% semi_join(testis_replicate1, by = c("V2", "V3"))
+
+# Calculate the average transcript abundance for ovary and testis
+avg_abundance_ovary <- ovary_merged[,7]+ovary_merged[,8]
+avg_abundance_testis <- testis_merged[,7]+testis_merged[,8]
+
+# Calculate the log fold change (r_g)
+log_fold_change <- abs(log2((1 + avg_abundance_ovary) / (1 + avg_abundance_testis)))
+```
+
+```{r}
+#| execution: {iopub.execute_input: '2023-10-18T22:17:00.165950Z', iopub.status.busy: '2023-10-18T22:17:00.164581Z', iopub.status.idle: '2023-10-18T22:17:00.188857Z'}
+#| trusted: true
+#| vscode: {languageId: r}
+testis_merged$log_fold_change <- log_fold_change[1:nrow(testis_merged)]
+top_transcripts_testis_highest <- testis_merged %>% arrange(desc(log_fold_change)) %>% head(5)
+top_transcripts_testis_lowest <- testis_merged %>% arrange(log_fold_change) %>% head(5)
+```
+
+```{r}
+#| execution: {iopub.execute_input: '2023-10-18T22:17:00.193618Z', iopub.status.busy: '2023-10-18T22:17:00.192121Z', iopub.status.idle: '2023-10-18T22:17:00.237759Z'}
+#| trusted: true
+#| vscode: {languageId: r}
+top_transcripts_testis_highest
+top_transcripts_testis_lowest
+```
+
+```{r}
+#| execution: {iopub.execute_input: '2023-10-18T22:17:00.241564Z', iopub.status.busy: '2023-10-18T22:17:00.240235Z', iopub.status.idle: '2023-10-18T22:17:00.255798Z'}
+#| trusted: true
+#| vscode: {languageId: r}
+ovary_rows_h <- ovary_merged[ovary_merged$V2 %in% top_transcripts_testis_highest$V2, ]
+ovary_rows_l <- ovary_merged[ovary_merged$V2 %in% top_transcripts_testis_lowest$V2, ]
+```
+
+```{r}
+#| execution: {iopub.execute_input: '2023-10-18T22:17:00.259710Z', iopub.status.busy: '2023-10-18T22:17:00.258369Z', iopub.status.idle: '2023-10-18T22:17:00.296358Z'}
+#| trusted: true
+#| vscode: {languageId: r}
+colnames(top_transcripts_testis_highest) <- c("chromosome", "start", "end", "strand", "intron_motif", "intron_annotation", "unique_reads", "multi_reads", "max_overhang", "logfold_change")
+data_highest <- splice.gene.mapping(top_transcripts_testis_highest)
+data_highest
+```
+
+```{r}
+#| execution: {iopub.execute_input: '2023-10-18T22:17:00.300022Z', iopub.status.busy: '2023-10-18T22:17:00.298755Z', iopub.status.idle: '2023-10-18T22:17:00.326502Z'}
+#| trusted: true
+#| vscode: {languageId: r}
+colnames(top_transcripts_testis_lowest) <- c("chromosome", "start", "end", "strand", "intron_motif", "intron_annotation", "unique_reads", "multi_reads", "max_overhang", "logfold_change")
+data_lowest <- splice.gene.mapping(top_transcripts_testis_lowest)
+data_lowest
+```
+
+```{r}
+#| execution: {iopub.execute_input: '2023-10-18T22:17:00.330339Z', iopub.status.busy: '2023-10-18T22:17:00.328990Z', iopub.status.idle: '2023-10-18T22:17:00.430797Z'}
+#| trusted: true
+#| vscode: {languageId: r}
+merged_lowest <- data.frame(gene_id = data_lowest$gene_id, chromosome = data_lowest$chromosome, start = data_lowest$start, end = data_lowest$end, testis_reads = data_lowest$total_reads, ovary_reads = 0, logfold_change = 0)
+
+    suppressWarnings({
+    # Iterate through each splice junction
+    for (i in 1:nrow(merged_lowest)) {
+      # Find the gene that contains the splice junction
+      ovary_reads <- (ovary_rows_l$V7[ovary_rows_l$V1 == merged_lowest$chromosome[i] &
+                            ovary_rows_l$V2 == merged_lowest$start[i] &
+                            ovary_rows_l$V3 == merged_lowest$end[i]] +
+                            ovary_rows_l$V8[ovary_rows_l$V1 == merged_lowest$chromosome[i] &
+                            ovary_rows_l$V2 == merged_lowest$start[i] &
+                            ovary_rows_l$V3 == merged_lowest$end[i]])
+     logfold_change <- (top_transcripts_testis_lowest$logfold_change[top_transcripts_testis_lowest$chromosome == merged_lowest$chromosome[i] &
+                            top_transcripts_testis_lowest$start == merged_lowest$start[i] &
+                            top_transcripts_testis_lowest$end == merged_lowest$end[i]])
+  
+        merged_lowest$ovary_reads[i] <- ovary_reads
+        merged_lowest$logfold_change[i] <- logfold_change
+    }}) 
+
+merged_highest <- data.frame(gene_id = data_highest$gene_id, chromosome = data_highest$chromosome, start = data_highest$start, end = data_highest$end, testis_reads = data_highest$total_reads, ovary_reads = 0, logfold_change = 0)
+
+    suppressWarnings({
+    # Iterate through each splice junction
+    for (i in 1:nrow(merged_highest)) {
+      # Find the gene that contains the splice junction
+      ovary_reads <- (ovary_rows_h$V7[ovary_rows_h$V1 == merged_highest$chromosome[i] &
+                            ovary_rows_h$V2 == merged_highest$start[i] &
+                            ovary_rows_h$V3 == merged_highest$end[i]] +
+                            ovary_rows_h$V8[ovary_rows_h$V1 == merged_highest$chromosome[i] &
+                            ovary_rows_h$V2 == merged_highest$start[i] &
+                            ovary_rows_h$V3 == merged_highest$end[i]])
+     logfold_change <- (top_transcripts_testis_highest$logfold_change[top_transcripts_testis_highest$chromosome == merged_highest$chromosome[i] &
+                            top_transcripts_testis_highest$start == merged_highest$start[i] &
+                            top_transcripts_testis_highest$end == merged_highest$end[i]])
+  
+        merged_highest$ovary_reads[i] <- ovary_reads
+        merged_highest$logfold_change[i] <- logfold_change
+    }}) 
+
+merged_highest
+merged_lowest
+```
+
+**Between Replicates 2**
+
+```{r}
+#| execution: {iopub.execute_input: '2023-10-18T22:17:00.434580Z', iopub.status.busy: '2023-10-18T22:17:00.433319Z', iopub.status.idle: '2023-10-18T22:17:00.483494Z'}
+#| trusted: true
+#| vscode: {languageId: r}
+testis_merged <- testis_replicate2 %>% semi_join(ovary_replicate2, by = c("V2", "V3"))
+ovary_merged <- ovary_replicate2 %>% semi_join(testis_replicate2, by = c("V2", "V3"))
+
+# Calculate the average transcript abundance for ovary and testis
+avg_abundance_ovary <- ovary_merged[,7]+ovary_merged[,8]
+avg_abundance_testis <- testis_merged[,7]+testis_merged[,8]
+
+# Calculate the log fold change (r_g)
+log_fold_change <- abs(log2((1 + avg_abundance_ovary) / (1 + avg_abundance_testis)))
+```
+
+```{r}
+#| execution: {iopub.execute_input: '2023-10-18T22:17:00.487459Z', iopub.status.busy: '2023-10-18T22:17:00.486069Z', iopub.status.idle: '2023-10-18T22:17:00.520404Z'}
+#| trusted: true
+#| vscode: {languageId: r}
+testis_merged$log_fold_change <- log_fold_change[1:nrow(testis_merged)]
+top_transcripts_testis_highest <- testis_merged %>% arrange(desc(log_fold_change)) %>% head(5)
+top_transcripts_testis_lowest <- testis_merged %>% arrange(log_fold_change) %>% head(5)
+```
+
+```{r}
+#| execution: {iopub.execute_input: '2023-10-18T22:17:00.524124Z', iopub.status.busy: '2023-10-18T22:17:00.522845Z', iopub.status.idle: '2023-10-18T22:17:00.563826Z'}
+#| trusted: true
+#| vscode: {languageId: r}
+top_transcripts_testis_highest
+top_transcripts_testis_lowest
+```
+
+```{r}
+#| execution: {iopub.execute_input: '2023-10-18T22:17:00.568924Z', iopub.status.busy: '2023-10-18T22:17:00.567582Z', iopub.status.idle: '2023-10-18T22:17:00.584508Z'}
+#| trusted: true
+#| vscode: {languageId: r}
+ovary_rows_h <- ovary_merged[ovary_merged$V2 %in% top_transcripts_testis_highest$V2, ]
+ovary_rows_l <- ovary_merged[ovary_merged$V2 %in% top_transcripts_testis_lowest$V2, ]
+```
+
+```{r}
+#| execution: {iopub.execute_input: '2023-10-18T22:17:00.589791Z', iopub.status.busy: '2023-10-18T22:17:00.588432Z', iopub.status.idle: '2023-10-18T22:17:00.620134Z'}
+#| trusted: true
+#| vscode: {languageId: r}
+colnames(top_transcripts_testis_highest) <- c("chromosome", "start", "end", "strand", "intron_motif", "intron_annotation", "unique_reads", "multi_reads", "max_overhang", "logfold_change")
+data_highest <- splice.gene.mapping(top_transcripts_testis_highest)
+data_highest
+```
+
+```{r}
+#| execution: {iopub.execute_input: '2023-10-18T22:17:00.634420Z', iopub.status.busy: '2023-10-18T22:17:00.623930Z', iopub.status.idle: '2023-10-18T22:17:00.664749Z'}
+#| trusted: true
+#| vscode: {languageId: r}
+colnames(top_transcripts_testis_lowest) <- c("chromosome", "start", "end", "strand", "intron_motif", "intron_annotation", "unique_reads", "multi_reads", "max_overhang", "logfold_change")
+data_lowest <- splice.gene.mapping(top_transcripts_testis_lowest)
+data_lowest
+```
+
+```{r}
+#| execution: {iopub.execute_input: '2023-10-18T22:17:00.669920Z', iopub.status.busy: '2023-10-18T22:17:00.668554Z', iopub.status.idle: '2023-10-18T22:17:00.772973Z'}
+#| trusted: true
+#| vscode: {languageId: r}
+merged_lowest_2 <- data.frame(gene_id = data_lowest$gene_id, chromosome = data_lowest$chromosome, start = data_lowest$start, end = data_lowest$end, testis_reads = data_lowest$total_reads, ovary_reads = 0, logfold_change = 0)
+
+    suppressWarnings({
+    # Iterate through each splice junction
+    for (i in 1:nrow(merged_lowest_2)) {
+      # Find the gene that contains the splice junction
+      ovary_reads <- (ovary_rows_l$V7[ovary_rows_l$V1 == merged_lowest_2$chromosome[i] &
+                            ovary_rows_l$V2 == merged_lowest_2$start[i] &
+                            ovary_rows_l$V3 == merged_lowest_2$end[i]] +
+                            ovary_rows_l$V8[ovary_rows_l$V1 == merged_lowest_2$chromosome[i] &
+                            ovary_rows_l$V2 == merged_lowest_2$start[i] &
+                            ovary_rows_l$V3 == merged_lowest_2$end[i]])
+     logfold_change <- (top_transcripts_testis_lowest$logfold_change[top_transcripts_testis_lowest$chromosome == merged_lowest_2$chromosome[i] &
+                            top_transcripts_testis_lowest$start == merged_lowest_2$start[i] &
+                            top_transcripts_testis_lowest$end == merged_lowest_2$end[i]])
+  
+        merged_lowest_2$ovary_reads[i] <- ovary_reads
+        merged_lowest_2$logfold_change[i] <- logfold_change
+    }}) 
+
+merged_highest <- data.frame(gene_id = data_highest$gene_id, chromosome = data_highest$chromosome, start = data_highest$start, end = data_highest$end, testis_reads = data_highest$total_reads, ovary_reads = 0, logfold_change = 0)
+
+    suppressWarnings({
+    # Iterate through each splice junction
+    for (i in 1:nrow(merged_highest)) {
+      # Find the gene that contains the splice junction
+      ovary_reads <- (ovary_rows_h$V7[ovary_rows_h$V1 == merged_highest$chromosome[i] &
+                            ovary_rows_h$V2 == merged_highest$start[i] &
+                            ovary_rows_h$V3 == merged_highest$end[i]] +
+                            ovary_rows_h$V8[ovary_rows_h$V1 == merged_highest$chromosome[i] &
+                            ovary_rows_h$V2 == merged_highest$start[i] &
+                            ovary_rows_h$V3 == merged_highest$end[i]])
+     logfold_change <- (top_transcripts_testis_highest$logfold_change[top_transcripts_testis_highest$chromosome == merged_highest$chromosome[i] &
+                            top_transcripts_testis_highest$start == merged_highest$start[i] &
+                            top_transcripts_testis_highest$end == merged_highest$end[i]])
+  
+        merged_highest$ovary_reads[i] <- ovary_reads
+        merged_highest$logfold_change[i] <- logfold_change
+    }}) 
+
+merged_highest
+merged_lowest_2
+```
+
+It's not logically correct to consider splicing junctions as being alternatively spliced solely based on log fold change values. Log fold change measures the difference in gene expression between two conditions, in this case, between ovary and testis. While a high log fold change indicates a substantial difference in expression, it doesn't directly imply alternative splicing of the same gene.
+
+Alternative splicing refers to the process by which different exons of a gene can be included or excluded in the final mRNA transcript, leading to the generation of multiple transcript isoforms from a single gene. To identify alternative splicing events, we have to look further at differences in the exon composition of transcripts or the presence of different splice junctions within the same gene.
+

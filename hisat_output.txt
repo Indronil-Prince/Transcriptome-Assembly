@@ -1,0 +1,143 @@
+hisat2 -x dmel_index -1 testis_replicate1_R1.fastq -2 testis_replicate1_R2.fastq -S testis_replicate1_FR.sam --rna-strandness FR
+
+5871282 reads; of these:
+  5871282 (100.00%) were paired; of these:
+    1064691 (18.13%) aligned concordantly 0 times
+    3061314 (52.14%) aligned concordantly exactly 1 time
+    1745277 (29.73%) aligned concordantly >1 times
+    ----
+    1064691 pairs aligned concordantly 0 times; of these:
+      9621 (0.90%) aligned discordantly 1 time
+    ----
+    1055070 pairs aligned 0 times concordantly or discordantly; of these:
+      2110140 mates make up the pairs; of these:
+        1399218 (66.31%) aligned 0 times
+        488662 (23.16%) aligned exactly 1 time
+        222260 (10.53%) aligned >1 times
+88.08% overall alignment rate
+
+hisat2 -x dmel_index -1 testis_replicate1_R1.fastq -2 testis_replicate1_R2.fastq -S testis_replicate1_RF.sam --rna-strandness RF
+
+5871282 reads; of these:
+  5871282 (100.00%) were paired; of these:
+    1064691 (18.13%) aligned concordantly 0 times
+    3061314 (52.14%) aligned concordantly exactly 1 time
+    1745277 (29.73%) aligned concordantly >1 times
+    ----
+    1064691 pairs aligned concordantly 0 times; of these:
+      9621 (0.90%) aligned discordantly 1 time
+    ----
+    1055070 pairs aligned 0 times concordantly or discordantly; of these:
+      2110140 mates make up the pairs; of these:
+        1399218 (66.31%) aligned 0 times
+        488662 (23.16%) aligned exactly 1 time
+        222260 (10.53%) aligned >1 times
+88.08% overall alignment rate
+
+hisat2 -x dmel_index -1 testis_replicate2_R1.fastq -2 testis_replicate2_R2.fastq -S testis_replicate2_FR.sam --rna-strandness FR
+
+4663928 reads; of these:
+  4663928 (100.00%) were paired; of these:
+    775484 (16.63%) aligned concordantly 0 times
+    2441565 (52.35%) aligned concordantly exactly 1 time
+    1446879 (31.02%) aligned concordantly >1 times
+    ----
+    775484 pairs aligned concordantly 0 times; of these:
+      8212 (1.06%) aligned discordantly 1 time
+    ----
+    767272 pairs aligned 0 times concordantly or discordantly; of these:
+      1534544 mates make up the pairs; of these:
+        905896 (59.03%) aligned 0 times
+        443075 (28.87%) aligned exactly 1 time
+        185573 (12.09%) aligned >1 times
+90.29% overall alignment rate
+
+hisat2 -x dmel_index -1 testis_replicate2_R1.fastq -2 testis_replicate2_R2.fastq -S testis_replicate2_RF.sam --rna-strandness RF
+
+4663928 reads; of these:
+  4663928 (100.00%) were paired; of these:
+    775484 (16.63%) aligned concordantly 0 times
+    2441565 (52.35%) aligned concordantly exactly 1 time
+    1446879 (31.02%) aligned concordantly >1 times
+    ----
+    775484 pairs aligned concordantly 0 times; of these:
+      8212 (1.06%) aligned discordantly 1 time
+    ----
+    767272 pairs aligned 0 times concordantly or discordantly; of these:
+      1534544 mates make up the pairs; of these:
+        905896 (59.03%) aligned 0 times
+        443075 (28.87%) aligned exactly 1 time
+        185573 (12.09%) aligned >1 times
+90.29% overall alignment rate
+
+hisat2 -x dmel_index -1 ovary_replicate1_R1.fastq -2 ovary_replicate1_R2.fastq -S ovary_replicate1_FR.sam --rna-strandness FR
+
+8341619 reads; of these:
+  8341619 (100.00%) were paired; of these:
+    1287027 (15.43%) aligned concordantly 0 times
+    4637515 (55.59%) aligned concordantly exactly 1 time
+    2417077 (28.98%) aligned concordantly >1 times
+    ----
+    1287027 pairs aligned concordantly 0 times; of these:
+      22283 (1.73%) aligned discordantly 1 time
+    ----
+    1264744 pairs aligned 0 times concordantly or discordantly; of these:
+      2529488 mates make up the pairs; of these:
+        1500056 (59.30%) aligned 0 times
+        742385 (29.35%) aligned exactly 1 time
+        287047 (11.35%) aligned >1 times
+91.01% overall alignment rate
+
+hisat2 -x dmel_index -1 ovary_replicate1_R1.fastq -2 ovary_replicate1_R2.fastq -S ovary_replicate1_RF.sam --rna-strandness RF
+
+  8341619 (100.00%) were paired; of these:
+    1287027 (15.43%) aligned concordantly 0 times
+    4637515 (55.59%) aligned concordantly exactly 1 time
+    2417077 (28.98%) aligned concordantly >1 times
+    ----
+    1287027 pairs aligned concordantly 0 times; of these:
+      22283 (1.73%) aligned discordantly 1 time
+    ----
+    1264744 pairs aligned 0 times concordantly or discordantly; of these:
+      2529488 mates make up the pairs; of these:
+        1500056 (59.30%) aligned 0 times
+        742385 (29.35%) aligned exactly 1 time
+        287047 (11.35%) aligned >1 times
+91.01% overall alignment rate
+
+hisat2 -x dmel_index -1 ovary_replicate2_R1.fastq -2 ovary_replicate2_R2.fastq -S ovary_replicate2_FR.sam --rna-strandness FR
+
+8341619 reads; of these:
+5823083 reads; of these:
+  5823083 (100.00%) were paired; of these:
+    916788 (15.74%) aligned concordantly 0 times
+    3151778 (54.13%) aligned concordantly exactly 1 time
+    1754517 (30.13%) aligned concordantly >1 times
+    ----
+    916788 pairs aligned concordantly 0 times; of these:
+      15062 (1.64%) aligned discordantly 1 time
+    ----
+    901726 pairs aligned 0 times concordantly or discordantly; of these:
+      1803452 mates make up the pairs; of these:
+        1044948 (57.94%) aligned 0 times
+        543465 (30.13%) aligned exactly 1 time
+        215039 (11.92%) aligned >1 times
+91.03% overall alignment rate
+
+hisat2 -x dmel_index -1 ovary_replicate2_R1.fastq -2 ovary_replicate2_R2.fastq -S ovary_replicate2_RF.sam --rna-strandness RF
+
+5823083 reads; of these:
+  5823083 (100.00%) were paired; of these:
+    916788 (15.74%) aligned concordantly 0 times
+    3151778 (54.13%) aligned concordantly exactly 1 time
+    1754517 (30.13%) aligned concordantly >1 times
+    ----
+    916788 pairs aligned concordantly 0 times; of these:
+      15062 (1.64%) aligned discordantly 1 time
+    ----
+    901726 pairs aligned 0 times concordantly or discordantly; of these:
+      1803452 mates make up the pairs; of these:
+        1044948 (57.94%) aligned 0 times
+        543465 (30.13%) aligned exactly 1 time
+        215039 (11.92%) aligned >1 times
+91.03% overall alignment rate
